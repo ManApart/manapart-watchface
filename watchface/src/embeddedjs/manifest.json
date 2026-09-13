@@ -5,6 +5,7 @@
 	],
 	"modules": {
 		"header-bar": "./header-bar",
+		"weather": "./weather",
 		"main": "./main"
 	}
 }

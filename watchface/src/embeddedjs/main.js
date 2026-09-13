@@ -1,7 +1,7 @@
 import Poco from "commodetto/Poco";
-import Location from "embedded:sensor/Location";
 import Message from "pebble/message";
 import {drawHeader, setDrawCallback as headerCallback} from "./header-bar"
+import {drawWeather, requestLocation, setDrawCallback as weatherCallback} from "./weather"
 
 let render = new Poco(screen);
 
@@ -10,7 +10,7 @@ const config = {
     white: render.makeColor(255, 255, 255),
     gray: render.makeColor(100, 100, 100),
     green: render.makeColor(0, 170, 0),
-    yellow: render.makeColor(255, 170, 0),
+    orange: render.makeColor(255, 170, 0),
     red: render.makeColor(255, 0, 0),
     blue: render.makeColor(0, 0, 255),
     fontLarge: new render.Font("Leco-Bold", 38),
@@ -35,7 +35,7 @@ function draw(event) {
     drawHeader(render, now, config)
     drawDateNames(render, now)
     drawTime(render, now)
-    // drawWeather(render)
+    drawWeather(render, config)
 
     render.end();
 }
@@ -66,7 +66,8 @@ function drawDateNames(render, now) {
 
 
 watch.addEventListener("minutechange", draw);
-// watch.addEventListener("hourchange", requestLocation);
+watch.addEventListener("hourchange", requestLocation);
 watch.addEventListener("resize", draw);
 
 headerCallback(draw)
+weatherCallback(draw)
