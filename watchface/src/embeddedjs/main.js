@@ -7,7 +7,7 @@ console.log('starting')
 
 let render = new Poco(screen);
 
-const colors = {
+const config = {
     black: render.makeColor(0, 0, 0),
     white: render.makeColor(255, 255, 255),
     gray: render.makeColor(100, 100, 100),
@@ -15,14 +15,12 @@ const colors = {
     yellow: render.makeColor(255, 170, 0),
     red: render.makeColor(255, 0, 0),
     blue: render.makeColor(0, 0, 255),
+    days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    timeFont: new render.Font("Bitham-Black", 30),
+    smallFont: new render.Font("Gothic-Regular", 18),
 }
 
-
-export const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-const timeFont = new render.Font("Bitham-Black", 30);
 
 let lastDate = new Date();
 
@@ -32,10 +30,10 @@ function draw(event) {
     if (event?.date) lastDate = event.date;
 
     render.begin();
-    render.fillRectangle(colors.white, 0, 0, render.width, render.height);
+    render.fillRectangle(config.white, 0, 0, render.width, render.height);
 
     // drawBluetooth(render)
-    drawHeader(render, now, colors)
+    drawHeader(render, now, config)
     drawTime(render, now)
     // drawWeather(render)
 
@@ -43,7 +41,7 @@ function draw(event) {
 }
 
 function drawTime(render, now) {
-    const blockHeight = timeFont.height;
+    const blockHeight = config.timeFont.height;
     const timeY = (render.unobstructed.height - blockHeight) / 2;
 
     let hours = now.getHours() % 12 || 12;
@@ -51,8 +49,8 @@ function drawTime(render, now) {
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const timeStr = `${hoursStr}:${minutes}`;
 
-    let width = render.getTextWidth(timeStr, timeFont);
-    render.drawText(timeStr, timeFont, colors.black,
+    let width = render.getTextWidth(timeStr, config.timeFont);
+    render.drawText(timeStr, config.timeFont, config.black,
         (render.unobstructed.width - width) / 2, timeY);
 }
 

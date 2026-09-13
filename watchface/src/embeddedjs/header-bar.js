@@ -4,7 +4,7 @@ let batteryPercent = 100;
 let isConnected = true;
 let drawCallback;
 
-export function setDrawCallback(callback){
+export function setDrawCallback(callback) {
     drawCallback = callback
 }
 
@@ -12,7 +12,7 @@ const battery = new Battery({
     onSample() {
         batteryPercent = this.sample().percent;
         console.log(`Battery Percent is ${batteryPercent}`)
-        if (drawCallback){
+        if (drawCallback) {
             drawCallback()
         }
     }
@@ -22,24 +22,37 @@ batteryPercent = battery.sample().percent;
 function checkConnection() {
     isConnected = watch.connected.app;
     console.log(`Bluetooth is connected: ${isConnected}`)
-    if (drawCallback){
+    if (drawCallback) {
         drawCallback()
     }
 }
 
-export function drawHeader(render, now, colors) {
+export function drawHeader(render, now, config) {
     let barColor;
     if (batteryPercent <= 20) {
-        barColor = colors.red;
+        barColor = config.red;
     } else if (batteryPercent <= 40) {
-        barColor = colors.yellow;
-    } else if (batteryPercent <= 90) {
-        barColor = colors.gray;
+        barColor = config.yellow;
+    } else if (batteryPercent <= 85) {
+        barColor = config.gray;
     } else {
-        barColor = colors.green;
+        barColor = config.green;
     }
 
     render.fillRectangle(barColor, 0, 0, render.width, 20);
+    if (isConnected) {
+        render.drawText("B", config.smallFont, config.white, 5, 0);
+    }
+    const batString = `${batteryPercent}%`
+    let width = render.getTextWidth(batString, config.smallFont);
+    render.drawText(batString, config.smallFont, config.white, render.unobstructed.width - width - 5, 0);
+
+    const date = now.getDate()
+    const month = now.getMonth()
+    const year = now.getFullYear().toString().slice(-2)
+    const dateStr = `${month}/${date}/${year}`;
+    width = render.getTextWidth(dateStr, config.smallFont);
+    render.drawText(dateStr, config.smallFont, config.white, (render.unobstructed.width - width) / 2, 0);
 }
 
 watch.addEventListener("connected", checkConnection);
