@@ -1,7 +1,8 @@
 import Poco from "commodetto/Poco";
 import Location from "embedded:sensor/Location";
 
-const weatherIcon = new Poco.PebbleDrawCommandImage(1);
+const weatherIcon = new Poco.PebbleDrawCommandImage(1).clone().scale(0.7);
+const weatherIconW = 50 * 0.7
 
 let weather = null;
 let location = null;
@@ -23,26 +24,28 @@ export function requestLocation() {
 }
 
 export function drawWeather(render, config) {
-    console.log('draw weather')
-    // const weatherY = render.unobstructed.height - smallFont.height -
-    //     (render.unobstructed.height < 180 ? 6 : 20);
-    // if (weather) {
-    //     const unit = settings.useFahrenheit ? "F" : "C";
-    //     const weatherStr = `${weather.temp}°${unit} ${weather.conditions}`;
-    //     const width = render.getTextWidth(weatherStr, smallFont);
-    //     render.drawText(weatherStr, smallFont, textColor,
-    //         (render.unobstructed.width - width) / 2, weatherY);
-    //     render.drawDCI(weatherIcon, (render.unobstructed.width - width) / 2 + width + 5, weatherY - smallFont.height/2);
-    // } else {
-    //     const msg = "Loading...";
-    //     const width = render.getTextWidth(msg, smallFont);
-    //     render.drawText(msg, smallFont, textColor,
-    //         (render.unobstructed.width - width) / 2, weatherY);
-    // }
+    drawCurrentWeather(render, config)
+    drawTomorrowWeather(render, config)
+    drawForecast(render, config)
 }
 
 function drawCurrentWeather(render, config) {
-
+    let startY = config.heightHeader + 2
+    const colWidth = 65
+    const color = getWeatherColor(50, config)
+    render.drawRoundRect(0, startY, colWidth, config.heighTopRow, color, 5);
+    let width = render.getTextWidth("Today", config.fontTiny);
+    render.drawText("Today", config.fontTiny, config.black, (colWidth - width) / 2, startY);
+    if (weather) {
+        const weatherStr = `${weather.temp}°F`;
+        startY += config.fontTiny.height
+        render.drawDCI(weatherIcon, (colWidth-weatherIconW)/2, startY);
+        startY += 30
+        width = render.getTextWidth(weatherStr, config.fontSmall);
+        render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, startY);
+    } else {
+        render.drawText("Loading...", config.fontSmall, config.black, 10, startY + config.fontTiny.height);
+    }
 }
 
 function drawTomorrowWeather(render, config) {
@@ -51,6 +54,20 @@ function drawTomorrowWeather(render, config) {
 
 function drawForecast(render, config) {
 
+}
+
+function getWeatherColor(temp, config) {
+    let color;
+    if (temp >= 90) {
+        color = config.red;
+    } else if (temp >= 80) {
+        color = config.orange;
+    } else if (temp >= 30) {
+        color = config.gray;
+    } else {
+        color = config.blue;
+    }
+    return color;
 }
 
 async function fetchWeather(latitude, longitude) {
@@ -82,7 +99,8 @@ async function fetchWeather(latitude, longitude) {
         }
 
     } catch (e) {
-        console.log("Weather fetch error: " + e);
+        console.log("Weather fetch error: " + String(e));
+        if (e.stack) console.log(e.stack);
     }
 }
 

@@ -32,7 +32,7 @@ export function drawHeader(render, now, config) {
     if (batteryPercent <= 20) {
         barColor = config.red;
     } else if (batteryPercent <= 40) {
-        barColor = config.yellow;
+        barColor = config.orange;
     } else if (batteryPercent <= 85) {
         barColor = config.gray;
     } else {

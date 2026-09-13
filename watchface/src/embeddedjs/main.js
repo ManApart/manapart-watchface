@@ -8,7 +8,7 @@ let render = new Poco(screen);
 const config = {
     black: render.makeColor(0, 0, 0),
     white: render.makeColor(255, 255, 255),
-    gray: render.makeColor(100, 100, 100),
+    gray: render.makeColor(161, 161, 161),
     green: render.makeColor(0, 170, 0),
     orange: render.makeColor(255, 170, 0),
     red: render.makeColor(255, 0, 0),
@@ -16,14 +16,13 @@ const config = {
     fontLarge: new render.Font("Leco-Bold", 38),
     fontMedium: new render.Font("Gothic-Regular", 28),
     fontSmall: new render.Font("Gothic-Regular", 18),
+    fontTiny: new render.Font("Gothic-Regular", 14),
     heightHeader: 20,
+    heighTopRow: 65,
 }
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-
 let lastDate = new Date();
-
 
 function draw(event) {
     const now = event?.date ?? lastDate;
@@ -66,7 +65,7 @@ function drawDateNames(render, now) {
 
 
 watch.addEventListener("minutechange", draw);
-watch.addEventListener("hourchange", requestLocation);
+// watch.addEventListener("hourchange", requestLocation);
 watch.addEventListener("resize", draw);
 
 headerCallback(draw)
