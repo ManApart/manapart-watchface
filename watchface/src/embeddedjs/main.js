@@ -3,8 +3,6 @@ import Location from "embedded:sensor/Location";
 import Message from "pebble/message";
 import {drawHeader, setDrawCallback as headerCallback} from "./header-bar"
 
-console.log('starting')
-
 let render = new Poco(screen);
 
 const config = {
@@ -15,11 +13,13 @@ const config = {
     yellow: render.makeColor(255, 170, 0),
     red: render.makeColor(255, 0, 0),
     blue: render.makeColor(0, 0, 255),
-    days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    timeFont: new render.Font("Bitham-Black", 30),
-    smallFont: new render.Font("Gothic-Regular", 18),
+    fontLarge: new render.Font("Leco-Bold", 38),
+    fontMedium: new render.Font("Gothic-Regular", 28),
+    fontSmall: new render.Font("Gothic-Regular", 18),
+    heightHeader: 20,
 }
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 
 let lastDate = new Date();
@@ -32,8 +32,8 @@ function draw(event) {
     render.begin();
     render.fillRectangle(config.white, 0, 0, render.width, render.height);
 
-    // drawBluetooth(render)
     drawHeader(render, now, config)
+    drawDateNames(render, now)
     drawTime(render, now)
     // drawWeather(render)
 
@@ -41,7 +41,7 @@ function draw(event) {
 }
 
 function drawTime(render, now) {
-    const blockHeight = config.timeFont.height;
+    const blockHeight = config.fontLarge.height;
     const timeY = (render.unobstructed.height - blockHeight) / 2;
 
     let hours = now.getHours() % 12 || 12;
@@ -49,9 +49,19 @@ function drawTime(render, now) {
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const timeStr = `${hoursStr}:${minutes}`;
 
-    let width = render.getTextWidth(timeStr, config.timeFont);
-    render.drawText(timeStr, config.timeFont, config.black,
+    let width = render.getTextWidth(timeStr, config.fontLarge);
+    render.drawText(timeStr, config.fontLarge, config.black,
         (render.unobstructed.width - width) / 2, timeY);
+}
+
+function drawDateNames(render, now) {
+    const dayName = DAYS[now.getDay()];
+    const monthName = MONTHS[now.getMonth()];
+    let width = render.getTextWidth(dayName, config.fontMedium);
+    let height = config.fontMedium.height;
+    render.drawText(dayName, config.fontMedium, config.black, (render.unobstructed.width - width) / 2, config.heightHeader + 2);
+    width = render.getTextWidth(monthName, config.fontMedium);
+    render.drawText(monthName, config.fontMedium, config.black, (render.unobstructed.width - width) / 2, config.heightHeader + 2 + height);
 }
 
 

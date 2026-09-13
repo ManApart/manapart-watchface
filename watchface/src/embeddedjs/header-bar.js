@@ -39,20 +39,20 @@ export function drawHeader(render, now, config) {
         barColor = config.green;
     }
 
-    render.fillRectangle(barColor, 0, 0, render.width, 20);
+    render.fillRectangle(barColor, 0, 0, render.width, config.heightHeader);
     if (isConnected) {
-        render.drawText("B", config.smallFont, config.white, 5, 0);
+        render.drawText("B", config.fontSmall, config.white, 5, 0);
     }
     const batString = `${batteryPercent}%`
-    let width = render.getTextWidth(batString, config.smallFont);
-    render.drawText(batString, config.smallFont, config.white, render.unobstructed.width - width - 5, 0);
+    let width = render.getTextWidth(batString, config.fontSmall);
+    render.drawText(batString, config.fontSmall, config.white, render.unobstructed.width - width - 5, 0);
 
     const date = now.getDate()
     const month = now.getMonth()
     const year = now.getFullYear().toString().slice(-2)
     const dateStr = `${month}/${date}/${year}`;
-    width = render.getTextWidth(dateStr, config.smallFont);
-    render.drawText(dateStr, config.smallFont, config.white, (render.unobstructed.width - width) / 2, 0);
+    width = render.getTextWidth(dateStr, config.fontSmall);
+    render.drawText(dateStr, config.fontSmall, config.white, (render.unobstructed.width - width) / 2, 0);
 }
 
 watch.addEventListener("connected", checkConnection);
