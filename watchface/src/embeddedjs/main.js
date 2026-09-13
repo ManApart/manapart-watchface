@@ -1,8 +1,7 @@
 import Poco from "commodetto/Poco";
-import Battery from "embedded:sensor/Battery";
 import Location from "embedded:sensor/Location";
 import Message from "pebble/message";
-import drawHeader from "./header-bar"
+import {drawHeader, setDrawCallback as headerCallback} from "./header-bar"
 
 console.log('starting')
 
@@ -25,18 +24,7 @@ export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
 
 const timeFont = new render.Font("Bitham-Black", 30);
 
-let batteryPercent = 100;
-let isConnected = true;
 let lastDate = new Date();
-
-const battery = new Battery({
-    onSample() {
-        batteryPercent = this.sample().percent;
-        console.log(`Battery Percent is ${batteryPercent}`)
-        draw();
-    }
-});
-batteryPercent = battery.sample().percent;
 
 
 function draw(event) {
@@ -46,7 +34,6 @@ function draw(event) {
     render.begin();
     render.fillRectangle(colors.white, 0, 0, render.width, render.height);
 
-    // drawBatteryBar(render)
     // drawBluetooth(render)
     drawHeader(render, now, colors)
     drawTime(render, now)
@@ -70,7 +57,8 @@ function drawTime(render, now) {
 }
 
 
-// watch.addEventListener("connected", checkConnection);
 watch.addEventListener("minutechange", draw);
 // watch.addEventListener("hourchange", requestLocation);
 watch.addEventListener("resize", draw);
+
+headerCallback(draw)
