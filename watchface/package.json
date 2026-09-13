@@ -1,10 +1,13 @@
 {
   "name": "manapart-face",
-  "author": "MakeAwesomeHappen",
+  "author": "Manapart",
   "version": "1.0.0",
   "keywords": ["pebble-app"],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "@moddable/pebbleproxy": "^0.2.0",
+    "@rebble/clay": "^1.1.0"
+  },
   "pebble": {
     "displayName": "manapart-face",
     "uuid": "cc8c22c1-fb2d-467c-8fc1-16fe140712e7",
@@ -15,6 +18,10 @@
       "emery",
       "gabbro"
     ],
+    "capabilities": [
+      "location",
+      "configurable"
+    ],
     "watchapp": {
       "watchface": true
     },
@@ -22,7 +29,13 @@
       "dummy"
     ],
     "resources": {
-      "media": []
+      "media": [
+        {
+          "type": "raw",
+          "name": "GENERIC_WEATHER",
+          "file": "Pebble_50x50_Generic_weather.pdc"
+        }
+      ]
     }
   }
 }
