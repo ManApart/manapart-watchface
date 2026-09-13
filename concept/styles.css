@@ -15,12 +15,14 @@ span {
     margin: 50px auto auto;
     width: 200px;
     height: 228px;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+
 }
 
 #other {
     background-color: white;
 }
-
 
 .row {
     margin-top: 2px;
@@ -33,12 +35,25 @@ span {
 
 #header {
     background-color: lightgrey;
+    margin-top: 0px;
+}
+
+#face {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 #top-row {
     font-size: 20px;
     padding-right: 5px;
     padding-left: 5px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    text-align: center;
+
+    .temp {
+        display: block;
+    }
 }
 
 #clock-row {
@@ -47,10 +62,6 @@ span {
 
 #forecast-row {
     font-size: 20px;
-
-    .hour {
-        font-size: 12px;
-    }
 }
 
 #tomorrow-row {
@@ -60,6 +71,18 @@ span {
 }
 
 #day {
-    margin-right: auto;
-    margin-left: 0px;
+    padding-top: 10px;
+}
+
+.icon {
+    width: 30px;
+}
+
+.hour {
+    font-size: 10px;
+    display: block;
+}
+
+.temp {
+    font-size: 14px;
 }
