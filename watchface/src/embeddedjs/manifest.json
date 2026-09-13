@@ -4,6 +4,7 @@
 		"$(MODDABLE)/examples/manifest_typings.json"
 	],
 	"modules": {
-		"*": "./main"
+		"header-bar": "./header-bar",
+		"main": "./main"
 	}
 }
