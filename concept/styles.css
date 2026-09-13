@@ -34,7 +34,7 @@ span {
 }
 
 #header {
-    background-color: lightgrey;
+    background-color: #a1a1a1;
     margin-top: 0px;
 }
 
@@ -85,4 +85,25 @@ span {
 
 .temp {
     font-size: 14px;
+}
+
+.weather {
+    border-radius: 2px;
+    margin-left: 1px;
+    background-color: #a1a1a1;
+}
+
+#forecast-1h {
+    background-color: #5252e4;
+}
+
+#forecast-2h {
+}
+
+#forecast-3h {
+    background-color: #ed9e6d;
+}
+
+#forecast-4h {
+    background-color: #ea6b6b;
 }
