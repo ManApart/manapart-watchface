@@ -17,6 +17,5 @@ npx live-server concept/
 | `Roboto-Condensed` | 21                    |
 
 
-```
-https://api.open-meteo.com/v1/forecast?latitude=100&longitude=100&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&current=temperature_2m,weather_code&forecast_days=1
-```
+Weather url:
+'https://api.open-meteo.com/v1/forecast?latitude=1&longitude=-1&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&current=temperature_2m,weather_code&timezone=auto&forecast_days=1&temperature_unit=fahrenheit'
