@@ -1,20 +1,6 @@
 npx live-server concept/
 
 
-Use noto emoji font for icons
-- degrees
-- batter
-- bluetooth
-- weather indications
-
-
-
-
-
-
-
-
-
 | Alloy font name    | Valid sizes           |
 | ------------------ | --------------------- |
 | `Bitham-Black`     | 30                    |
@@ -29,3 +15,8 @@ Use noto emoji font for icons
 | `Leco-Regular`     | 42                    |
 | `Roboto-Bold`      | 49                    |
 | `Roboto-Condensed` | 21                    |
+
+
+```
+https://api.open-meteo.com/v1/forecast?latitude=100&longitude=100&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&current=temperature_2m,weather_code&forecast_days=1
+```

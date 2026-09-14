@@ -1,8 +1,14 @@
 import Poco from "commodetto/Poco";
 import Location from "embedded:sensor/Location";
 
-const weatherIcon = new Poco.PebbleDrawCommandImage(1).clone().scale(0.7);
-const weatherIconW = 50 * 0.7
+const weatherGeneric = new Poco.PebbleDrawCommandImage(1).clone().scale(0.7);
+const weatherHeavyRain = new Poco.PebbleDrawCommandImage(2).clone().scale(0.7);
+const weatherHeavySnow = new Poco.PebbleDrawCommandImage(3).clone().scale(0.7);
+const weatherLightRain = new Poco.PebbleDrawCommandImage(4).clone().scale(0.7);
+const weatherLightSnow = new Poco.PebbleDrawCommandImage(5).clone().scale(0.7);
+const weatherPartlyCloudy = new Poco.PebbleDrawCommandImage(6).clone().scale(0.7);
+const weatherSunnyDay = new Poco.PebbleDrawCommandImage(7).clone().scale(0.7);
+const iconWidth = 50 * 0.7
 
 let weather = null;
 let location = null;
@@ -39,7 +45,7 @@ function drawCurrentWeather(render, config) {
     if (weather) {
         const weatherStr = `${weather.temp}°F`;
         startY += config.fontTiny.height
-        render.drawDCI(weatherIcon, (colWidth-weatherIconW)/2, startY);
+        render.drawDCI(weather.icon, (colWidth - iconWidth) / 2, startY);
         startY += 30
         width = render.getTextWidth(weatherStr, config.fontSmall);
         render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, startY);
@@ -84,12 +90,20 @@ async function fetchWeather(latitude, longitude) {
         url.search = new URLSearchParams(params);
 
         console.log("Fetching weather...");
-        const response = await fetch(url);
-        const data = await response.json();
+        const response = await fetch(url.toString());
+
+        console.log("HTTP status: " + response.status);
+        console.log("Content-Type: " + response.headers.get("content-type"));
+
+        const body = await response.text();
+        console.log("Response body: " + body);
+
+        const data = JSON.parse(body);
 
         weather = {
             temp: Math.round(data.current.temperature_2m),
-            conditions: getWeatherDescription(data.current.weather_code)
+            conditions: getWeatherDescription(data.current.weather_code),
+            icon: getWeatherIcon(data.current.weather_code),
         };
 
         console.log("Weather: " + weather.temp + "C, " + weather.conditions);
@@ -146,6 +160,23 @@ function getWeatherDescription(code) {
     if (code === 95) return "T-Storm";
     if (code <= 99) return "T-Storm";
     return "Unknown";
+}
+
+function getWeatherIcon(code) {
+    if (code === 0) return weatherSunnyDay;
+    if (code <= 3) return weatherPartlyCloudy;
+    if (code <= 48) return weatherPartlyCloudy;
+    if (code <= 55) return weatherLightSnow;
+    if (code <= 57) return weatherLightSnow;
+    if (code <= 65) return weatherLightRain;
+    if (code <= 67) return weatherLightRain;
+    if (code <= 75) return weatherLightSnow;
+    if (code <= 77) return weatherHeavySnow;
+    if (code <= 82) return weatherHeavyRain;
+    if (code <= 86) return weatherHeavySnow;
+    if (code === 95) return weatherHeavyRain;
+    if (code <= 99) return weatherHeavyRain;
+    return weatherGeneric;
 }
 
 loadCachedWeather();

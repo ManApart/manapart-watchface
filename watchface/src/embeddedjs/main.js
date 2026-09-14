@@ -65,7 +65,7 @@ function drawDateNames(render, now) {
 
 
 watch.addEventListener("minutechange", draw);
-// watch.addEventListener("hourchange", requestLocation);
+watch.addEventListener("hourchange", requestLocation);
 watch.addEventListener("resize", draw);
 
 headerCallback(draw)
