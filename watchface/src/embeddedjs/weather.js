@@ -40,7 +40,7 @@ export function drawWeather(render, config) {
 }
 
 function drawCurrentWeather(render, config) {
-    let startY = config.heightHeader + 2
+    const startY = config.heightHeader + 2
     const colWidth = 65
     const w = weather?.current
     if (w) {
@@ -61,6 +61,22 @@ function drawCurrentWeather(render, config) {
 }
 
 function drawTomorrowWeather(render, config) {
+    const startY = config.heightHeader + 2
+    const colWidth = 65
+    const startX = render.unobstructed.width - colWidth
+    const w = weather?.tomorrow
+    if (w) {
+        const color = getWeatherColor(w.high, config)
+        render.drawRoundRect(startX, startY, colWidth, config.heighTopRow, color, 5);
+        const weatherStr = `${w.low}°/${w.high}°`;
+        let y = startY + config.fontTiny.height
+        render.drawDCI(getWeatherIcon(w.code), startX + (colWidth - iconWidth) / 2, y);
+        y += 30
+        let width = render.getTextWidth(weatherStr, config.fontSmall);
+        render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
+    }
+    let width = render.getTextWidth("Tomorrow", config.fontTiny);
+    render.drawText("Tomorrow", config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
 }
 
 function drawForecast(render, config) {
