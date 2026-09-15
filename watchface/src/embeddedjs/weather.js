@@ -1,11 +1,9 @@
 import Message from "pebble/message";
 import Poco from "commodetto/Poco";
-import Location from "embedded:sensor/Location";
 
+const disableCache = true
 const iconWidth = 50 * 0.7
-
 let weather = null;
-let location = null;
 let drawCallback;
 
 const message = new Message({
@@ -16,8 +14,7 @@ const message = new Message({
     onReadable() {
         const values = this.read();
         if (values.has("weather")) {
-            const weather = values.get("weather");
-            console.log("Received weather: " + weather);
+            updateWeather(values.get("weather"));
         }
     },
 });
@@ -27,17 +24,13 @@ export function setDrawCallback(callback) {
 }
 
 export function requestLocation() {
-    location = new Location({
-        onSample() {
-            const sample = this.sample();
-            console.log("Got location: " + sample.latitude + ", " + sample.longitude);
-            this.close();
-            // fetchWeather(sample.latitude, sample.longitude);
-            message.write(new Map([
-                ["weather_request", JSON.stringify({latitude: sample.latitude, longitude: sample.longitude})]
-            ]));
-        }
-    });
+    try {
+        message.write(new Map([
+            ["weather_request", 1]
+        ]));
+    } catch (e) {
+        console.log("Unable to request weather: " + String(e));
+    }
 }
 
 export function drawWeather(render, config) {
@@ -56,7 +49,7 @@ function drawCurrentWeather(render, config) {
     if (weather) {
         const weatherStr = `${weather.current.temp}°F`;
         startY += config.fontTiny.height
-        render.drawDCI(weather.current.icon, (colWidth - iconWidth) / 2, startY);
+        render.drawDCI(getWeatherIcon(weather.current.code), (colWidth - iconWidth) / 2, startY);
         startY += 30
         width = render.getTextWidth(weatherStr, config.fontSmall);
         render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, startY);
@@ -87,74 +80,32 @@ function getWeatherColor(temp, config) {
     return color;
 }
 
-async function fetchWeather(latitude, longitude) {
-    // const params = {
-    //     latitude,
-    //     longitude,
-    //     // daily: "temperature_2m_max,temperature_2m_min,weather_code",
-    //     hourly: "temperature_2m,weather_code",
-    //     // current: "temperature_2m,weather_code",
-    //     timezone: "auto",
-    //     // forecast_days: "1",
-    //     temperature_unit: "fahrenheit",
-    // };
-    //
-    // const url = new URL("https://api.open-meteo.com/v1/forecast");
-    // url.search = new URLSearchParams(params);
-    //
-    // try {
-    //     let body = await (await fetch(url.toString())).json();
-    //     // console.log("Weather response: " + body);
-    //     weather = parseWeather(body)
-    //
-    // } catch (e) {
-    //     console.log("Weather fetch error: " + String(e));
-    // }
-    // if (response) {
-    //     try {
-    //         // body = await response.text();
-    //         // const data = JSON.parse(body);
-    //         // weather = parseWeather(data)
-    //         // console.log("Weather: " + weather.temp + "F, " + weather.conditions);
-    //     } catch (e) {
-    //         console.log("HTTP status: " + response.status);
-    //         console.log("Content-Type: " + response.headers.get("content-type"));
-    //         console.log("Response body: " + body);
-    //         console.log("Weather parse error: " + String(e));
-    //     }
-    // }
-    weather = {
-        current: {
-            temp: 80,
-            conditions: 'clear',
-            icon: getWeatherIcon(0),
-        }
-    }
+async function updateWeather(data) {
+    weather = JSON.parse(data)
     if (weather) {
         saveWeather();
     }
     if (drawCallback) {
         drawCallback()
     }
-    console.log('parsed: ' + weather)
 }
 
 function loadCachedWeather() {
-    // const cached = localStorage.getItem("weather");
-    // const cachedTime = localStorage.getItem("weatherTime");
-    //
-    // if (cached && cachedTime) {
-    //     const age = Date.now() - Number(cachedTime);
-    //     if (age < 60 * 60 * 1000) {
-    //         try {
-    //             weather = JSON.parse(cached);
-    //             console.log("Using cached weather");
-    //             return true;
-    //         } catch (e) {
-    //             console.log("Failed to parse cached weather");
-    //         }
-    //     }
-    // }
+    const cached = localStorage.getItem("weather");
+    const cachedTime = localStorage.getItem("weatherTime");
+
+    if (!disableCache && cached && cachedTime) {
+        const age = Date.now() - Number(cachedTime);
+        if (age < 60 * 60 * 1000) {
+            try {
+                weather = JSON.parse(cached);
+                console.log("Using cached weather");
+                return true;
+            } catch (e) {
+                console.log("Failed to parse cached weather");
+            }
+        }
+    }
     return false;
 }
 
@@ -164,51 +115,6 @@ function saveWeather() {
         localStorage.setItem("weatherTime", String(Date.now()));
         console.log('Saved Weather')
     }
-}
-
-function parseWeather(data) {
-    const parsed = {
-        current: {
-            temp: Math.round(data.current.temperature_2m),
-            conditions: getWeatherDescription(data.current.weather_code),
-            icon: getWeatherIcon(data.current.weather_code),
-        },
-        hourly: [],
-        // tomorrow: {
-        //     high: Math.round(data.daily.temperature_2m_max[0]),
-        //     low: Math.round(data.daily.temperature_2m_min[0]),
-        //     conditions: getWeatherDescription(data.daily.weather_code[0]),
-        //     icon: getWeatherIcon(data.current.weather_code[0]),
-        // },
-    };
-
-    // for (let hour = 0; hour < 24; hour++) {
-    //     parsed.hourly[hour] = {
-    //         hour,
-    //         temp: Math.round(data.hourly.temperature_2m[hour]),
-    //         conditions: getWeatherDescription(data.hourly.weather_code[hour]),
-    //         icon: getWeatherIcon(data.hourly.weather_code[hour]),
-    //     }
-    // }
-
-    return parsed
-}
-
-function getWeatherDescription(code) {
-    if (code === 0) return "Clear";
-    if (code <= 3) return "Cloudy";
-    if (code <= 48) return "Fog";
-    if (code <= 55) return "Drizzle";
-    if (code <= 57) return "Fz. Drizzle";
-    if (code <= 65) return "Rain";
-    if (code <= 67) return "Fz. Rain";
-    if (code <= 75) return "Snow";
-    if (code <= 77) return "Snow Grains";
-    if (code <= 82) return "Showers";
-    if (code <= 86) return "Snow Shwrs";
-    if (code === 95) return "T-Storm";
-    if (code <= 99) return "T-Storm";
-    return "Unknown";
 }
 
 function getWeatherIcon(code) {
