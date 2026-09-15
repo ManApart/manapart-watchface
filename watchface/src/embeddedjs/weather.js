@@ -1,7 +1,7 @@
 import Message from "pebble/message";
 import Poco from "commodetto/Poco";
 
-const disableCache = true
+const disableCache = false
 const iconWidth = 50 * 0.7
 let weather = null;
 let drawCallback;
@@ -42,24 +42,25 @@ export function drawWeather(render, config) {
 function drawCurrentWeather(render, config) {
     let startY = config.heightHeader + 2
     const colWidth = 65
-    const color = getWeatherColor(50, config)
-    render.drawRoundRect(0, startY, colWidth, config.heighTopRow, color, 5);
-    let width = render.getTextWidth("Today", config.fontTiny);
-    render.drawText("Today", config.fontTiny, config.black, (colWidth - width) / 2, startY);
-    if (weather) {
-        const weatherStr = `${weather.current.temp}°F`;
-        startY += config.fontTiny.height
-        render.drawDCI(getWeatherIcon(weather.current.code), (colWidth - iconWidth) / 2, startY);
-        startY += 30
-        width = render.getTextWidth(weatherStr, config.fontSmall);
-        render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, startY);
+    const w = weather?.current
+    if (w) {
+        const color = getWeatherColor(w.temp, config)
+        render.drawRoundRect(0, startY, colWidth, config.heighTopRow, color, 5);
+        const weatherStr = `${w.temp}°F`;
+        let y = startY + config.fontTiny.height
+        render.drawDCI(getWeatherIcon(w.code), (colWidth - iconWidth) / 2, y);
+        y += 30
+        let width = render.getTextWidth(weatherStr, config.fontSmall);
+        render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, y);
     } else {
+        render.drawRoundRect(0, startY, colWidth, config.heighTopRow, config.gray, 5);
         render.drawText("Loading...", config.fontSmall, config.black, 10, startY + config.fontTiny.height);
     }
+    let width = render.getTextWidth("Today", config.fontTiny);
+    render.drawText("Today", config.fontTiny, config.black, (colWidth - width) / 2, startY);
 }
 
 function drawTomorrowWeather(render, config) {
-
 }
 
 function drawForecast(render, config) {
@@ -118,16 +119,20 @@ function saveWeather() {
 }
 
 function getWeatherIcon(code) {
-    if (code === 0) return new Poco.PebbleDrawCommandImage(7).clone().scale(0.7); // Sunny
-    if (code <= 48) return new Poco.PebbleDrawCommandImage(6).clone().scale(0.7); // Cloudy
-    if (code <= 57) return new Poco.PebbleDrawCommandImage(5).clone().scale(0.7); // Light Snow
-    if (code <= 67) return new Poco.PebbleDrawCommandImage(4).clone().scale(0.7); // Light Rain
-    if (code <= 75) return new Poco.PebbleDrawCommandImage(5).clone().scale(0.7); // Light Snow
-    if (code <= 77) return new Poco.PebbleDrawCommandImage(3).clone().scale(0.7); // Heavy Snow
-    if (code <= 82) return new Poco.PebbleDrawCommandImage(2).clone().scale(0.7); // Heavy Rain
-    if (code <= 86) return new Poco.PebbleDrawCommandImage(3).clone().scale(0.7); // Heavy Snow
-    if (code <= 99) return new Poco.PebbleDrawCommandImage(2).clone().scale(0.7); // Heavy Rain
-    return new Poco.PebbleDrawCommandImage(1).clone().scale(0.7); //Generic
+    if (code === 0) return getIcon(7); // Sunny
+    if (code <= 48) return getIcon(6); // Cloudy
+    if (code <= 57) return getIcon(5); // Light Snow
+    if (code <= 67) return getIcon(4); // Light Rain
+    if (code <= 75) return getIcon(5); // Light Snow
+    if (code <= 77) return getIcon(3); // Heavy Snow
+    if (code <= 82) return getIcon(2); // Heavy Rain
+    if (code <= 86) return getIcon(3); // Heavy Snow
+    if (code <= 99) return getIcon(2); // Heavy Rain
+    return getIcon(1); //Generic
+}
+
+function getIcon(i){
+    return new Poco.PebbleDrawCommandImage(i).clone().scale(0.5);
 }
 
 loadCachedWeather();
