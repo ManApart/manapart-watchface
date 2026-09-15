@@ -61,7 +61,7 @@ function fetchWeather(latitude, longitude) {
     request.send();
 }
 
-// Pebble.addEventListener("ready", getLocation);
+Pebble.addEventListener("ready", getLocation);
 Pebble.addEventListener("appmessage", function (event) {
     if (event.payload.weather_request) {
         getLocation()

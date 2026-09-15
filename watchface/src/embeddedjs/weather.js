@@ -33,10 +33,10 @@ export function requestLocation() {
     }
 }
 
-export function drawWeather(render, config) {
+export function drawWeather(render, config, now) {
     drawCurrentWeather(render, config)
     drawTomorrowWeather(render, config)
-    drawForecast(render, config)
+    drawForecast(render, config, now)
 }
 
 function drawCurrentWeather(render, config) {
@@ -79,7 +79,44 @@ function drawTomorrowWeather(render, config) {
     render.drawText("Tomorrow", config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
 }
 
-function drawForecast(render, config) {
+function drawForecast(render, config, now) {
+    if (weather) {
+        const currentHour = now.getHours()
+        for (let i = 0; i < 4; i++) {
+            const hour = currentHour + i + 1
+            const temp = weather.hourlyTemps[hour]
+            const code = weather.hourlyCodes[hour]
+            if (temp === undefined || code === undefined) {
+                return;
+            }
+            drawForecastSlot(render, config, i, currentHour, hour, temp, code)
+        }
+    }
+}
+
+function drawForecastSlot(render, config, i, currentHour, hour, temp, code) {
+    const colWidth = 48
+    const colHeight = 65
+    const startY = render.unobstructed.height - colHeight;
+    const startX = 1 + (colWidth + 2) * i
+
+    const color = getWeatherColor(temp, config)
+    render.drawRoundRect(startX, startY, colWidth, colHeight, color, 5);
+
+    let pm = "pm"
+    if (hour < 12) {
+        pm = "am"
+    }
+    const hourDisplay = `${hour % 12 || 12}${pm}`;
+    let width = render.getTextWidth(hourDisplay, config.fontTiny);
+    render.drawText(hourDisplay, config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
+
+    let y = startY + config.fontTiny.height
+    render.drawDCI(getWeatherIcon(code), startX + (colWidth - iconWidth) / 2, y);
+    y += 30
+    const weatherStr = `${temp}°`;
+    width = render.getTextWidth(weatherStr, config.fontSmall);
+    render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
 
 }
 
@@ -134,21 +171,21 @@ function saveWeather() {
     }
 }
 
-function getWeatherIcon(code) {
-    if (code === 0) return getIcon(7); // Sunny
-    if (code <= 48) return getIcon(6); // Cloudy
-    if (code <= 57) return getIcon(5); // Light Snow
-    if (code <= 67) return getIcon(4); // Light Rain
-    if (code <= 75) return getIcon(5); // Light Snow
-    if (code <= 77) return getIcon(3); // Heavy Snow
-    if (code <= 82) return getIcon(2); // Heavy Rain
-    if (code <= 86) return getIcon(3); // Heavy Snow
-    if (code <= 99) return getIcon(2); // Heavy Rain
+function getWeatherIcon(code, scale = 0.5) {
+    if (code === 0) return getIcon(7, scale); // Sunny
+    if (code <= 48) return getIcon(6, scale); // Cloudy
+    if (code <= 57) return getIcon(5, scale); // Light Snow
+    if (code <= 67) return getIcon(4, scale); // Light Rain
+    if (code <= 75) return getIcon(5, scale); // Light Snow
+    if (code <= 77) return getIcon(3, scale); // Heavy Snow
+    if (code <= 82) return getIcon(2, scale); // Heavy Rain
+    if (code <= 86) return getIcon(3, scale); // Heavy Snow
+    if (code <= 99) return getIcon(2, scale); // Heavy Rain
     return getIcon(1); //Generic
 }
 
-function getIcon(i){
-    return new Poco.PebbleDrawCommandImage(i).clone().scale(0.5);
+function getIcon(i, scale) {
+    return new Poco.PebbleDrawCommandImage(i).clone().scale(scale);
 }
 
 loadCachedWeather();

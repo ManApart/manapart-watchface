@@ -33,7 +33,7 @@ function draw(event) {
     drawHeader(render, now, config)
     drawDateNames(render, now)
     drawTime(render, now)
-    drawWeather(render, config)
+    drawWeather(render, config, now)
 
     render.end();
 }
