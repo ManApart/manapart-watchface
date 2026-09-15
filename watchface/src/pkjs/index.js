@@ -20,9 +20,8 @@ function getLocation() {
 function fetchWeather(latitude, longitude) {
     const request = new XMLHttpRequest();
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&forecast_days=1&temperature_unit=fahrenheit`
-    console.log('url: ' + url)
-    request.open("GET", url);
 
+    request.open("GET", url);
     request.onload = function () {
         if (request.status !== 200) {
             console.log("Weather HTTP error: " + request.status);
@@ -31,22 +30,25 @@ function fetchWeather(latitude, longitude) {
 
         try {
             const data = JSON.parse(request.responseText);
-            console.log(data.current.temperature_2m)
-            Pebble.sendAppMessage({
-                weather: JSON.stringify({
-                    current: {
-                        temp: Math.round(data.current.temperature_2m),
-                        code: data.current.weather_code,
-                    },
-                    hourly: [],
-                    // tomorrow: {
-                    //     high: Math.round(data.daily.temperature_2m_max[0]),
-                    //     low: Math.round(data.daily.temperature_2m_min[0]),
-                    //     conditions: getWeatherDescription(data.daily.weather_code[0]),
-                    //     icon: getWeatherIcon(data.current.weather_code[0]),
-                    // },
-                })
-            });
+            const weather = {
+                current: {
+                    temp: Math.round(data.current.temperature_2m),
+                    code: data.current.weather_code,
+                },
+                hourlyTemps: data.hourly.temperature_2m.map(temp => Math.round(temp)),
+                hourlyCodes: data.hourly.weather_code,
+                tomorrow: {
+                    high: Math.round(data.daily.temperature_2m_max[0]),
+                    low: Math.round(data.daily.temperature_2m_min[0]),
+                    code: data.daily.weather_code[0],
+                },
+            }
+
+            Pebble.sendAppMessage(
+                {weather: JSON.stringify(weather)},
+                () => console.log("Weather message sent"),
+                error => console.log("Weather message failed: " + JSON.stringify(error))
+            );
         } catch (error) {
             console.log("Weather parse error: " + error);
         }
