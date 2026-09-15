@@ -1,3 +1,4 @@
+import Message from "pebble/message";
 import Poco from "commodetto/Poco";
 import Location from "embedded:sensor/Location";
 
@@ -6,6 +7,20 @@ const iconWidth = 50 * 0.7
 let weather = null;
 let location = null;
 let drawCallback;
+
+const message = new Message({
+    input: 256,
+    output: 256,
+    keys: ["weather", "weather_request"],
+
+    onReadable() {
+        const values = this.read();
+        if (values.has("weather")) {
+            const weather = values.get("weather");
+            console.log("Received weather: " + weather);
+        }
+    },
+});
 
 export function setDrawCallback(callback) {
     drawCallback = callback
@@ -17,7 +32,10 @@ export function requestLocation() {
             const sample = this.sample();
             console.log("Got location: " + sample.latitude + ", " + sample.longitude);
             this.close();
-            fetchWeather(sample.latitude, sample.longitude);
+            // fetchWeather(sample.latitude, sample.longitude);
+            message.write(new Map([
+                ["weather_request", JSON.stringify({latitude: sample.latitude, longitude: sample.longitude})]
+            ]));
         }
     });
 }

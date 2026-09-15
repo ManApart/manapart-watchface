@@ -1,5 +1,19 @@
+function fetchWeather() {
+    const weather = JSON.stringify({
+        current: {
+            temp: 80,
+            conditions: 'clear',
+            weatherCode: 0,
+        }
+    })
+    Pebble.sendAppMessage({weather});
+}
 
-const moddableProxy = require("@moddable/pebbleproxy");
-moddableProxy.log = true;
-Pebble.addEventListener('ready', moddableProxy.readyReceived);
-Pebble.addEventListener('appmessage', moddableProxy.appMessageReceived);
+Pebble.addEventListener("ready", fetchWeather);
+
+
+Pebble.addEventListener("appmessage", function (event) {
+    if (event.payload.weather_request) {
+        fetchWeather();
+    }
+});
