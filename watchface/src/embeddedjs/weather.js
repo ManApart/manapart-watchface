@@ -68,15 +68,18 @@ function drawTomorrowWeather(render, config) {
     if (w) {
         const color = getWeatherColor(w.high, config)
         render.drawRoundRect(startX, startY, colWidth, config.heighTopRow, color, 5);
+
+        let width = render.getTextWidth("Tomorrow", config.fontTiny);
+        render.drawText("Tomorrow", config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
+
         const weatherStr = `${w.low}°/${w.high}°`;
         let y = startY + config.fontTiny.height
         render.drawDCI(getWeatherIcon(w.code), startX + (colWidth - iconWidth) / 2, y);
+
         y += 30
-        let width = render.getTextWidth(weatherStr, config.fontSmall);
+        width = render.getTextWidth(weatherStr, config.fontSmall);
         render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
     }
-    let width = render.getTextWidth("Tomorrow", config.fontTiny);
-    render.drawText("Tomorrow", config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
 }
 
 function drawForecast(render, config, now) {

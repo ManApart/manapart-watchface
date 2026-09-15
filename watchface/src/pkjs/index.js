@@ -19,7 +19,7 @@ function getLocation() {
 
 function fetchWeather(latitude, longitude) {
     const request = new XMLHttpRequest();
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&forecast_days=1&temperature_unit=fahrenheit`
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&forecast_days=1&temperature_unit=fahrenheit&timezone=auto`
 
     request.open("GET", url);
     request.onload = function () {
