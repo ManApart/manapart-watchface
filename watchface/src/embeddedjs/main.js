@@ -1,5 +1,4 @@
 import Poco from "commodetto/Poco";
-import Message from "pebble/message";
 import {drawHeader, setDrawCallback as headerCallback} from "./header-bar"
 import {drawWeather, requestLocation, setDrawCallback as weatherCallback} from "./weather"
 

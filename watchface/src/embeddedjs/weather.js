@@ -1,13 +1,6 @@
 import Poco from "commodetto/Poco";
 import Location from "embedded:sensor/Location";
 
-const weatherGeneric = new Poco.PebbleDrawCommandImage(1).clone().scale(0.7);
-const weatherHeavyRain = new Poco.PebbleDrawCommandImage(2).clone().scale(0.7);
-const weatherHeavySnow = new Poco.PebbleDrawCommandImage(3).clone().scale(0.7);
-const weatherLightRain = new Poco.PebbleDrawCommandImage(4).clone().scale(0.7);
-const weatherLightSnow = new Poco.PebbleDrawCommandImage(5).clone().scale(0.7);
-const weatherPartlyCloudy = new Poco.PebbleDrawCommandImage(6).clone().scale(0.7);
-const weatherSunnyDay = new Poco.PebbleDrawCommandImage(7).clone().scale(0.7);
 const iconWidth = 50 * 0.7
 
 let weather = null;
@@ -43,9 +36,9 @@ function drawCurrentWeather(render, config) {
     let width = render.getTextWidth("Today", config.fontTiny);
     render.drawText("Today", config.fontTiny, config.black, (colWidth - width) / 2, startY);
     if (weather) {
-        const weatherStr = `${weather.temp}°F`;
+        const weatherStr = `${weather.current.temp}°F`;
         startY += config.fontTiny.height
-        render.drawDCI(weather.icon, (colWidth - iconWidth) / 2, startY);
+        render.drawDCI(weather.current.icon, (colWidth - iconWidth) / 2, startY);
         startY += 30
         width = render.getTextWidth(weatherStr, config.fontSmall);
         render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, startY);
@@ -77,63 +70,73 @@ function getWeatherColor(temp, config) {
 }
 
 async function fetchWeather(latitude, longitude) {
-    try {
-        const params = {
-            latitude,
-            longitude,
-            current: "temperature_2m,weather_code"
-        };
-
-        params.temperature_unit = "fahrenheit";
-
-        const url = new URL("https://api.open-meteo.com/v1/forecast");
-        url.search = new URLSearchParams(params);
-
-        console.log("Fetching weather...");
-        const response = await fetch(url.toString());
-
-        console.log("HTTP status: " + response.status);
-        console.log("Content-Type: " + response.headers.get("content-type"));
-
-        const body = await response.text();
-        console.log("Response body: " + body);
-
-        const data = JSON.parse(body);
-
-        weather = {
-            temp: Math.round(data.current.temperature_2m),
-            conditions: getWeatherDescription(data.current.weather_code),
-            icon: getWeatherIcon(data.current.weather_code),
-        };
-
-        console.log("Weather: " + weather.temp + "C, " + weather.conditions);
-        saveWeather();
-        if (drawCallback) {
-            drawCallback()
+    // const params = {
+    //     latitude,
+    //     longitude,
+    //     // daily: "temperature_2m_max,temperature_2m_min,weather_code",
+    //     hourly: "temperature_2m,weather_code",
+    //     // current: "temperature_2m,weather_code",
+    //     timezone: "auto",
+    //     // forecast_days: "1",
+    //     temperature_unit: "fahrenheit",
+    // };
+    //
+    // const url = new URL("https://api.open-meteo.com/v1/forecast");
+    // url.search = new URLSearchParams(params);
+    //
+    // try {
+    //     let body = await (await fetch(url.toString())).json();
+    //     // console.log("Weather response: " + body);
+    //     weather = parseWeather(body)
+    //
+    // } catch (e) {
+    //     console.log("Weather fetch error: " + String(e));
+    // }
+    // if (response) {
+    //     try {
+    //         // body = await response.text();
+    //         // const data = JSON.parse(body);
+    //         // weather = parseWeather(data)
+    //         // console.log("Weather: " + weather.temp + "F, " + weather.conditions);
+    //     } catch (e) {
+    //         console.log("HTTP status: " + response.status);
+    //         console.log("Content-Type: " + response.headers.get("content-type"));
+    //         console.log("Response body: " + body);
+    //         console.log("Weather parse error: " + String(e));
+    //     }
+    // }
+    weather = {
+        current: {
+            temp: 80,
+            conditions: 'clear',
+            icon: getWeatherIcon(0),
         }
-
-    } catch (e) {
-        console.log("Weather fetch error: " + String(e));
-        if (e.stack) console.log(e.stack);
     }
+    if (weather) {
+        saveWeather();
+    }
+    if (drawCallback) {
+        drawCallback()
+    }
+    console.log('parsed: ' + weather)
 }
 
 function loadCachedWeather() {
-    const cached = localStorage.getItem("weather");
-    const cachedTime = localStorage.getItem("weatherTime");
-
-    if (cached && cachedTime) {
-        const age = Date.now() - Number(cachedTime);
-        if (age < 60 * 60 * 1000) {
-            try {
-                weather = JSON.parse(cached);
-                console.log("Using cached weather");
-                return true;
-            } catch (e) {
-                console.log("Failed to parse cached weather");
-            }
-        }
-    }
+    // const cached = localStorage.getItem("weather");
+    // const cachedTime = localStorage.getItem("weatherTime");
+    //
+    // if (cached && cachedTime) {
+    //     const age = Date.now() - Number(cachedTime);
+    //     if (age < 60 * 60 * 1000) {
+    //         try {
+    //             weather = JSON.parse(cached);
+    //             console.log("Using cached weather");
+    //             return true;
+    //         } catch (e) {
+    //             console.log("Failed to parse cached weather");
+    //         }
+    //     }
+    // }
     return false;
 }
 
@@ -143,6 +146,34 @@ function saveWeather() {
         localStorage.setItem("weatherTime", String(Date.now()));
         console.log('Saved Weather')
     }
+}
+
+function parseWeather(data) {
+    const parsed = {
+        current: {
+            temp: Math.round(data.current.temperature_2m),
+            conditions: getWeatherDescription(data.current.weather_code),
+            icon: getWeatherIcon(data.current.weather_code),
+        },
+        hourly: [],
+        // tomorrow: {
+        //     high: Math.round(data.daily.temperature_2m_max[0]),
+        //     low: Math.round(data.daily.temperature_2m_min[0]),
+        //     conditions: getWeatherDescription(data.daily.weather_code[0]),
+        //     icon: getWeatherIcon(data.current.weather_code[0]),
+        // },
+    };
+
+    // for (let hour = 0; hour < 24; hour++) {
+    //     parsed.hourly[hour] = {
+    //         hour,
+    //         temp: Math.round(data.hourly.temperature_2m[hour]),
+    //         conditions: getWeatherDescription(data.hourly.weather_code[hour]),
+    //         icon: getWeatherIcon(data.hourly.weather_code[hour]),
+    //     }
+    // }
+
+    return parsed
 }
 
 function getWeatherDescription(code) {
@@ -163,20 +194,16 @@ function getWeatherDescription(code) {
 }
 
 function getWeatherIcon(code) {
-    if (code === 0) return weatherSunnyDay;
-    if (code <= 3) return weatherPartlyCloudy;
-    if (code <= 48) return weatherPartlyCloudy;
-    if (code <= 55) return weatherLightSnow;
-    if (code <= 57) return weatherLightSnow;
-    if (code <= 65) return weatherLightRain;
-    if (code <= 67) return weatherLightRain;
-    if (code <= 75) return weatherLightSnow;
-    if (code <= 77) return weatherHeavySnow;
-    if (code <= 82) return weatherHeavyRain;
-    if (code <= 86) return weatherHeavySnow;
-    if (code === 95) return weatherHeavyRain;
-    if (code <= 99) return weatherHeavyRain;
-    return weatherGeneric;
+    if (code === 0) return new Poco.PebbleDrawCommandImage(7).clone().scale(0.7); // Sunny
+    if (code <= 48) return new Poco.PebbleDrawCommandImage(6).clone().scale(0.7); // Cloudy
+    if (code <= 57) return new Poco.PebbleDrawCommandImage(5).clone().scale(0.7); // Light Snow
+    if (code <= 67) return new Poco.PebbleDrawCommandImage(4).clone().scale(0.7); // Light Rain
+    if (code <= 75) return new Poco.PebbleDrawCommandImage(5).clone().scale(0.7); // Light Snow
+    if (code <= 77) return new Poco.PebbleDrawCommandImage(3).clone().scale(0.7); // Heavy Snow
+    if (code <= 82) return new Poco.PebbleDrawCommandImage(2).clone().scale(0.7); // Heavy Rain
+    if (code <= 86) return new Poco.PebbleDrawCommandImage(3).clone().scale(0.7); // Heavy Snow
+    if (code <= 99) return new Poco.PebbleDrawCommandImage(2).clone().scale(0.7); // Heavy Rain
+    return new Poco.PebbleDrawCommandImage(1).clone().scale(0.7); //Generic
 }
 
 loadCachedWeather();

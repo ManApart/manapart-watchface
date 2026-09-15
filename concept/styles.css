@@ -11,13 +11,12 @@ span {
 }
 
 #main {
-    background-color: white;
+    background-color: #d5d5d5;
     margin: 50px auto auto;
     width: 200px;
     height: 228px;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
-
 }
 
 #other {
@@ -58,6 +57,9 @@ span {
 
 #clock-row {
     font-size: 60px;
+    background-color: white;
+    border-radius: 2px;
+    margin: 5px;
 }
 
 #forecast-row {
