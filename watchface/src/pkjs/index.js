@@ -1,20 +1,27 @@
+const testing = false
+
 function getLocation() {
     navigator.geolocation.getCurrentPosition(
         function (pos) {
-            fetchWeather(
-                pos.coords.latitude,
-                pos.coords.longitude
-            );
+            if (testing) {
+                testWeather()
+            } else {
+                fetchWeather(pos.coords.latitude, pos.coords.longitude);
+            }
         },
+
         function (err) {
             console.log("Location error: " + err.message);
         },
         {
             enableHighAccuracy: false,
-            maximumAge: 15 * 60 * 1000,
-            timeout: 10000
+            maximumAge:
+                15 * 60 * 1000,
+            timeout:
+                10000
         }
-    );
+    )
+    ;
 }
 
 function fetchWeather(latitude, longitude) {
@@ -59,6 +66,28 @@ function fetchWeather(latitude, longitude) {
     };
 
     request.send();
+}
+
+function testWeather() {
+    const weather = {
+        current: {
+            temp: 70,
+            code: 0,
+        },
+        hourlyTemps: [20,30,50,80,20,30,50,80,20,30,50,80,20,30,50,80],
+        hourlyCodes: [57,67,77,99,57,67,77,99,57,67,77,99,57,67,77,99],
+        tomorrow: {
+            high: 90,
+            low: 70,
+            code: 48,
+        },
+    }
+
+    Pebble.sendAppMessage(
+        {weather: JSON.stringify(weather)},
+        () => console.log("Weather message sent"),
+        error => console.log("Weather message failed: " + JSON.stringify(error))
+    );
 }
 
 Pebble.addEventListener("ready", getLocation);

@@ -93,6 +93,7 @@ function drawForecast(render, config, now) {
             const temp = weather.hourlyTemps[hour]
             const code = weather.hourlyCodes[hour]
             if (temp === undefined || code === undefined) {
+                console.log(`Failed hour ${i} with ${temp} and ${code}`)
                 return;
             }
             drawForecastSlot(render, config, i, currentHour, hour, temp, code)
