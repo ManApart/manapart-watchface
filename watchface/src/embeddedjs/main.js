@@ -7,17 +7,18 @@ let render = new Poco(screen);
 const config = {
     black: render.makeColor(0, 0, 0),
     white: render.makeColor(255, 255, 255),
-    gray: render.makeColor(161, 161, 161),
-    green: render.makeColor(0, 170, 0),
-    orange: render.makeColor(255, 170, 0),
-    red: render.makeColor(255, 0, 0),
-    blue: render.makeColor(0, 0, 255),
-    fontLarge: new render.Font("Leco-Bold", 38),
+    lightGray: render.makeColor(170,170,170),
+    gray: render.makeColor(85,85,85),
+    green: render.makeColor(85, 255, 170),
+    orange: render.makeColor(255, 170, 85),
+    red: render.makeColor(255, 85, 85),
+    blue: render.makeColor(85, 170, 255),
+    fontLarge: new render.Font("Roboto-Bold", 49),
     fontMedium: new render.Font("Gothic-Regular", 28),
     fontSmall: new render.Font("Gothic-Regular", 18),
     fontTiny: new render.Font("Gothic-Regular", 14),
     heightHeader: 20,
-    heighTopRow: 65,
+    heightRow: 60,
 }
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -28,7 +29,7 @@ function draw(event) {
     if (event?.date) lastDate = event.date;
 
     render.begin();
-    render.fillRectangle(config.white, 0, 0, render.width, render.height);
+    render.fillRectangle(config.lightGray, 0, 0, render.width, render.height);
 
     drawHeader(render, now, config)
     drawDateNames(render, now)
@@ -39,8 +40,11 @@ function draw(event) {
 }
 
 function drawTime(render, now) {
-    const blockHeight = config.fontLarge.height;
-    const timeY = (render.unobstructed.height - blockHeight) / 2;
+    const startY = config.heightRow + config.heightHeader + 4
+    const timeY = (render.height + config.heightHeader - config.fontLarge.height) / 2;
+    const boxHeight = render.height - config.heightHeader - (2 * config.heightRow) - 8
+
+    render.drawRoundRect(2, startY, render.width - 4, boxHeight, config.white, 5);
 
     let hours = now.getHours() % 12 || 12;
     const hoursStr = String(hours).padStart(2, "0");
@@ -49,7 +53,7 @@ function drawTime(render, now) {
 
     let width = render.getTextWidth(timeStr, config.fontLarge);
     render.drawText(timeStr, config.fontLarge, config.black,
-        (render.unobstructed.width - width) / 2, timeY);
+        (render.width - width) / 2, timeY);
 }
 
 function drawDateNames(render, now) {
@@ -57,9 +61,9 @@ function drawDateNames(render, now) {
     const monthName = MONTHS[now.getMonth()];
     let width = render.getTextWidth(dayName, config.fontMedium);
     let height = config.fontMedium.height;
-    render.drawText(dayName, config.fontMedium, config.black, (render.unobstructed.width - width) / 2, config.heightHeader + 2);
+    render.drawText(dayName, config.fontMedium, config.black, (render.width - width) / 2, config.heightHeader + 2);
     width = render.getTextWidth(monthName, config.fontMedium);
-    render.drawText(monthName, config.fontMedium, config.black, (render.unobstructed.width - width) / 2, config.heightHeader + 2 + height);
+    render.drawText(monthName, config.fontMedium, config.black, (render.width - width) / 2, config.heightHeader + 2 + height);
 }
 
 

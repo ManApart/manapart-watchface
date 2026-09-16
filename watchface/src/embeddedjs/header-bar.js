@@ -45,14 +45,14 @@ export function drawHeader(render, now, config) {
     }
     const batString = `${batteryPercent}%`
     let width = render.getTextWidth(batString, config.fontSmall);
-    render.drawText(batString, config.fontSmall, config.black, render.unobstructed.width - width - 5, 0);
+    render.drawText(batString, config.fontSmall, config.black, render.width - width - 5, 0);
 
     const date = now.getDate()
     const month = now.getMonth()
     const year = now.getFullYear().toString().slice(-2)
     const dateStr = `${month}/${date}/${year}`;
     width = render.getTextWidth(dateStr, config.fontSmall);
-    render.drawText(dateStr, config.fontSmall, config.black, (render.unobstructed.width - width) / 2, 0);
+    render.drawText(dateStr, config.fontSmall, config.black, (render.width - width) / 2, 0);
 }
 
 watch.addEventListener("connected", checkConnection);
