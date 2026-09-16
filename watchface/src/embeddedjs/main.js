@@ -29,7 +29,7 @@ function draw(event) {
     if (event?.date) lastDate = event.date;
 
     render.begin();
-    render.fillRectangle(config.lightGray, 0, 0, render.width, render.height);
+    render.fillRectangle(config.gray, 0, 0, render.width, render.height);
 
     drawHeader(render, now, config)
     drawDateNames(render, now)
@@ -61,9 +61,9 @@ function drawDateNames(render, now) {
     const monthName = MONTHS[now.getMonth()];
     let width = render.getTextWidth(dayName, config.fontMedium);
     let height = config.fontMedium.height;
-    render.drawText(dayName, config.fontMedium, config.black, (render.width - width) / 2, config.heightHeader + 2);
+    render.drawText(dayName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2);
     width = render.getTextWidth(monthName, config.fontMedium);
-    render.drawText(monthName, config.fontMedium, config.black, (render.width - width) / 2, config.heightHeader + 2 + height);
+    render.drawText(monthName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2 + height);
 }
 
 

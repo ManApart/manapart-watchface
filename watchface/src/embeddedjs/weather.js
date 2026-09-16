@@ -44,22 +44,21 @@ function drawCurrentWeather(render, config) {
     const startX = 2
     const colWidth = 65
     const w = weather?.current
-    const color = getWeatherColor(w.temp, config)
-    const fontColor = getWeatherFontColor(w.temp, config)
     if (w) {
+        const color = getWeatherColor(w.temp, config)
         render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
         let y = startY + config.fontTiny.height
         render.drawDCI(getWeatherIcon(w.code), (colWidth - iconWidth) / 2, y);
         y += 28
         const weatherStr = `${w.temp}°F`;
         let width = render.getTextWidth(weatherStr, config.fontSmall);
-        render.drawText(weatherStr, config.fontSmall, fontColor, (colWidth - width) / 2, y);
+        render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, y);
     } else {
-        render.drawRoundRect(startX, startY, colWidth, config.heightRow, config.gray, 5);
-        render.drawText("Loading...", config.fontSmall, fontColor, 10, startY + config.fontTiny.height);
+        render.drawRoundRect(startX, startY, colWidth, config.heightRow, config.lightGray, 5);
+        render.drawText("Loading...", config.fontSmall, config.black, 10, startY + config.fontTiny.height);
     }
     let width = render.getTextWidth("Today", config.fontTiny);
-    render.drawText("Today", config.fontTiny, fontColor, (colWidth - width) / 2, startY);
+    render.drawText("Today", config.fontTiny, config.black, (colWidth - width) / 2, startY);
 }
 
 function drawTomorrowWeather(render, config) {
@@ -67,13 +66,12 @@ function drawTomorrowWeather(render, config) {
     const colWidth = 65
     const startX = render.width - colWidth - 2
     const w = weather?.tomorrow
-    const color = getWeatherColor(w.high, config)
-    const fontColor = getWeatherFontColor(w.high, config)
     if (w) {
+        const color = getWeatherColor(w.high, config)
         render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
 
         let width = render.getTextWidth("Tomorrow", config.fontTiny);
-        render.drawText("Tomorrow", config.fontTiny, fontColor, startX + (colWidth - width) / 2, startY);
+        render.drawText("Tomorrow", config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
 
         let y = startY + config.fontTiny.height
         render.drawDCI(getWeatherIcon(w.code), startX + (colWidth - iconWidth) / 2, y);
@@ -81,7 +79,7 @@ function drawTomorrowWeather(render, config) {
         y += 28
         const weatherStr = `${w.low}°/${w.high}°`;
         width = render.getTextWidth(weatherStr, config.fontSmall);
-        render.drawText(weatherStr, config.fontSmall, fontColor, startX + (colWidth - width) / 2, y);
+        render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
     }
 }
 
@@ -107,7 +105,6 @@ function drawForecastSlot(render, config, i, currentHour, hour, temp, code) {
     const startX = 1 + (colWidth + 2) * i
 
     const color = getWeatherColor(temp, config)
-    const fontColor = getWeatherFontColor(temp, config)
     render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
 
     let pm = "pm"
@@ -116,14 +113,14 @@ function drawForecastSlot(render, config, i, currentHour, hour, temp, code) {
     }
     const hourDisplay = `${hour % 12 || 12}${pm}`;
     let width = render.getTextWidth(hourDisplay, config.fontTiny);
-    render.drawText(hourDisplay, config.fontTiny, fontColor, startX + (colWidth - width) / 2, startY);
+    render.drawText(hourDisplay, config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
 
     let y = startY + config.fontTiny.height
     render.drawDCI(getWeatherIcon(code), startX + (colWidth - iconWidth) / 2, y);
     y += 28
     const weatherStr = `${temp}°`;
     width = render.getTextWidth(weatherStr, config.fontSmall);
-    render.drawText(weatherStr, config.fontSmall, fontColor, startX + (colWidth - width) / 2, y);
+    render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
 
 }
 
@@ -134,23 +131,9 @@ function getWeatherColor(temp, config) {
     } else if (temp >= 80) {
         color = config.orange;
     } else if (temp >= 30) {
-        color = config.gray;
+        color = config.lightGray;
     } else {
         color = config.blue;
-    }
-    return color;
-}
-
-function getWeatherFontColor(temp, config) {
-    let color;
-    if (temp >= 90) {
-        color = config.black;
-    } else if (temp >= 80) {
-        color = config.black;
-    } else if (temp >= 30) {
-        color = config.white;
-    } else {
-        color = config.black;
     }
     return color;
 }
