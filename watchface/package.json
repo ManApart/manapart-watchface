@@ -33,7 +33,7 @@
         {
           "type": "raw",
           "name": "GENERIC_WEATHER",
-          "file": "Pebble_50x50_Generic_weather.pdc"
+          "file": "cloudy.pdc"
         },
         {
           "type": "raw",

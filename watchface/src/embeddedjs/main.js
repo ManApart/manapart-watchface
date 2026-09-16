@@ -11,7 +11,7 @@ const config = {
     gray: render.makeColor(85,85,85),
     green: render.makeColor(85, 255, 170),
     orange: render.makeColor(255, 170, 85),
-    red: render.makeColor(170, 85, 85),
+    red: render.makeColor(255, 170, 170),
     blue: render.makeColor(85, 170, 255),
     fontLarge: new render.Font("Roboto-Bold", 49),
     fontMedium: new render.Font("Gothic-Regular", 28),
