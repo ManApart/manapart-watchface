@@ -185,7 +185,7 @@ function getWeatherIcon(code, scale = 0.5) {
     // if (code <= 82) return getIcon(2, scale); // Heavy Rain
     // if (code <= 86) return getIcon(3, scale); // Heavy Snow
     // if (code <= 99) return getIcon(2, scale); // Heavy Rain
-    return getIcon(1, scale); //Generic
+    return getIcon(2, scale); //Generic
 }
 
 function getIcon(i, scale) {

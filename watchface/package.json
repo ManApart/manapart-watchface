@@ -38,32 +38,32 @@
         {
           "type": "raw",
           "name": "HEAVY_RAIN",
-          "file": "Pebble_50x50_Heavy_rain.pdc"
+          "file": "rain-heavy.pdc"
         },
         {
           "type": "raw",
           "name": "HEAVY_SNOW",
-          "file": "Pebble_50x50_Heavy_snow.pdc"
+          "file": "snow-heavy.pdc"
         },
         {
           "type": "raw",
           "name": "LIGHT_RAIN",
-          "file": "Pebble_50x50_Light_rain.pdc"
+          "file": "rain-light.pdc"
         },
         {
           "type": "raw",
           "name": "LIGHT_SNOW",
-          "file": "Pebble_50x50_Light_snow.pdc"
+          "file": "snow-light.pdc"
         },
         {
           "type": "raw",
           "name": "PARTLY_CLOUDY",
-          "file": "Pebble_50x50_Partly_cloudy.pdc"
+          "file": "cloudy.pdc"
         },
         {
           "type": "raw",
           "name": "SUNNY_DAY",
-          "file": "Pebble_50x50_Sunny_day.pdc"
+          "file": "sunny.pdc"
         }
       ]
     }
