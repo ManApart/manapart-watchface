@@ -33,7 +33,7 @@
         {
           "type": "raw",
           "name": "GENERIC_WEATHER",
-          "file": "cloudy.pdc"
+          "file": "partly-cloudy.pdc"
         },
         {
           "type": "raw",
