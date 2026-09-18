@@ -23,7 +23,7 @@ export function setDrawCallback(callback) {
     drawCallback = callback
 }
 
-export function requestLocation() {
+export function requestWeather() {
     try {
         message.write(new Map([
             ["weather_request", 1]

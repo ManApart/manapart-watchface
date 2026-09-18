@@ -1,6 +1,6 @@
 import Poco from "commodetto/Poco";
 import {drawHeader, setDrawCallback as headerCallback} from "./header-bar"
-import {drawWeather, requestLocation, setDrawCallback as weatherCallback} from "./weather"
+import {drawWeather, requestWeather, setDrawCallback as weatherCallback} from "./weather"
 
 let render = new Poco(screen);
 
@@ -25,18 +25,22 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 let lastDate = new Date();
 
 function draw(event) {
-    const now = event?.date ?? lastDate;
-    if (event?.date) lastDate = event.date;
+    try {
+        const now = event?.date ?? lastDate;
+        if (event?.date) lastDate = event.date;
 
-    render.begin();
-    render.fillRectangle(config.gray, 0, 0, render.width, render.height);
+        render.begin();
+        render.fillRectangle(config.gray, 0, 0, render.width, render.height);
 
-    drawHeader(render, now, config)
-    drawDateNames(render, now)
-    drawTime(render, now)
-    drawWeather(render, config, now)
+        drawHeader(render, now, config)
+        drawDateNames(render, now)
+        drawTime(render, now)
+        drawWeather(render, config, now)
 
-    render.end();
+        render.end();
+    }catch (e) {
+        console.log("Draw failed: " + e)
+    }
 }
 
 function drawTime(render, now) {
@@ -68,7 +72,7 @@ function drawDateNames(render, now) {
 
 
 watch.addEventListener("minutechange", draw);
-watch.addEventListener("hourchange", requestLocation);
+watch.addEventListener("hourchange", requestWeather);
 watch.addEventListener("resize", draw);
 
 headerCallback(draw)
