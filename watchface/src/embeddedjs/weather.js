@@ -175,22 +175,21 @@ function saveWeather() {
     }
 }
 
-function getWeatherIcon(code, scale = 0.5) {
-    // if (code === 0) return getIcon(7, scale); // Sunny
-    // if (code <= 48) return getIcon(6, scale); // Cloudy
-    // if (code <= 57) return getIcon(5, scale); // Light Snow
-    // if (code <= 67) return getIcon(4, scale); // Light Rain
-    // if (code <= 75) return getIcon(5, scale); // Light Snow
-    // if (code <= 77) return getIcon(3, scale); // Heavy Snow
-    // if (code <= 82) return getIcon(2, scale); // Heavy Rain
-    // if (code <= 86) return getIcon(3, scale); // Heavy Snow
-    // if (code <= 99) return getIcon(2, scale); // Heavy Rain
-    return getIcon(1, scale); //Generic
+function getWeatherIcon(code) {
+    if (code === 0) return getIcon(7); // Sunny
+    if (code <= 48) return getIcon(6); // Cloudy
+    if (code <= 57) return getIcon(5); // Light Snow
+    if (code <= 67) return getIcon(4); // Light Rain
+    if (code <= 75) return getIcon(5); // Light Snow
+    if (code <= 77) return getIcon(3); // Heavy Snow
+    if (code <= 82) return getIcon(2); // Heavy Rain
+    if (code <= 86) return getIcon(3); // Heavy Snow
+    if (code <= 99) return getIcon(2); // Heavy Rain
+    return getIcon(3); //Generic
 }
 
-function getIcon(i, scale) {
+function getIcon(i) {
     return new Poco.PebbleDrawCommandImage(i);
-    // return new Poco.PebbleDrawCommandImage(i).clone().scale(scale);
 }
 
 loadCachedWeather();
