@@ -16,7 +16,7 @@ function getLocation() {
         {
             enableHighAccuracy: false,
             maximumAge:
-                15 * 60 * 1000,
+                24 * 60 * 1000,
             timeout:
                 10000
         }
@@ -26,7 +26,7 @@ function getLocation() {
 
 function fetchWeather(latitude, longitude) {
     const request = new XMLHttpRequest();
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&forecast_days=1&temperature_unit=fahrenheit&timezone=auto`
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&forecast_days=2&temperature_unit=fahrenheit&timezone=auto`
 
     request.open("GET", url);
     request.onload = function () {
@@ -36,20 +36,23 @@ function fetchWeather(latitude, longitude) {
         }
 
         try {
+            const start = new Date().getHours();
             const data = JSON.parse(request.responseText);
             const weather = {
+                asOf: start,
                 current: {
                     temp: Math.round(data.current.temperature_2m),
                     code: data.current.weather_code,
                 },
-                hourlyTemps: data.hourly.temperature_2m.map(temp => Math.round(temp)),
-                hourlyCodes: data.hourly.weather_code,
+                hourlyTemps: data.hourly.temperature_2m.map(temp => Math.round(temp)).slice(start, start + 10),
+                hourlyCodes: data.hourly.weather_code.slice(start, start + 10),
                 tomorrow: {
-                    high: Math.round(data.daily.temperature_2m_max[0]),
-                    low: Math.round(data.daily.temperature_2m_min[0]),
-                    code: data.daily.weather_code[0],
+                    high: Math.round(data.daily.temperature_2m_max[1]),
+                    low: Math.round(data.daily.temperature_2m_min[1]),
+                    code: data.daily.weather_code[1],
                 },
             }
+            console.log(JSON.stringify(weather))
 
             Pebble.sendAppMessage(
                 {weather: JSON.stringify(weather)},
@@ -74,8 +77,8 @@ function testWeather() {
             temp: 70,
             code: 0,
         },
-        hourlyTemps: [20,30,50,80,20,30,50,80,20,30,50,80,20,30,50,80],
-        hourlyCodes: [57,67,77,99,57,67,77,99,57,67,77,99,57,67,77,99],
+        hourlyTemps: [20, 30, 50, 80, 20, 30, 50, 80, 20, 30, 50, 80, 20, 30, 50, 80],
+        hourlyCodes: [57, 67, 77, 99, 57, 67, 77, 99, 57, 67, 77, 99, 57, 67, 77, 99],
         tomorrow: {
             high: 90,
             low: 70,

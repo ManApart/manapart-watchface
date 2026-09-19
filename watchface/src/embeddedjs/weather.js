@@ -33,35 +33,52 @@ export function requestWeather() {
     }
 }
 
+//TODO -update current and possibly future based on stale time
 export function drawWeather(render, config, now) {
-    drawCurrentWeather(render, config)
-    drawTomorrowWeather(render, config)
-    drawForecast(render, config, now)
+    let hourIndex = 0
+    if (weather?.current) {
+        let hour = now.getHours()
+        if (hour < weather?.current?.asOf) {
+            hour += 12
+        }
+        hourIndex = hour - (weather?.current?.asOf ?? hour)
+        console.log('asof ' + weather?.current?.asOf)
+        console.log('hour ' + hour)
+        console.log('hourIndex' + hourIndex)
+    }
+    drawCurrentWeather(render, config, hourIndex)
+    drawTomorrowWeather(render, config, hourIndex)
+    drawForecast(render, config, hourIndex, now)
 }
 
-function drawCurrentWeather(render, config) {
+function drawCurrentWeather(render, config, hourIndex) {
     const startY = config.heightHeader + 2
     const startX = 2
     const colWidth = 65
-    const w = weather?.current
-    if (w) {
-        const color = getWeatherColor(w.temp, config)
+    if (weather) {
+        let temp = weather.current.temp
+        let code = weather.current.code
+        if (hourIndex !== 0) {
+            temp = weather.hourlyTemps[hourIndex] ?? weather.hourlyTemps.slice(-1)[0]
+            code = weather.hourlyCodes[hourIndex] ?? weather.hourlyCodes.slice(-1)[0]
+        }
+        const color = getWeatherColor(temp, config)
         render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
         let y = startY + config.fontTiny.height
-        render.drawDCI(getWeatherIcon(w.code), (colWidth - iconWidth) / 2, y);
+        render.drawDCI(getWeatherIcon(code), (colWidth - iconWidth) / 2, y);
         y += 28
-        const weatherStr = `${w.temp}°F`;
+        const weatherStr = `${temp}°F`;
         let width = render.getTextWidth(weatherStr, config.fontSmall);
         render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, y);
     } else {
         render.drawRoundRect(startX, startY, colWidth, config.heightRow, config.lightGray, 5);
-        render.drawText("Loading...", config.fontSmall, config.black, 10, startY + config.fontTiny.height);
+        render.drawText("No Data", config.fontSmall, config.black, 10, startY + config.fontTiny.height);
     }
     let width = render.getTextWidth("Today", config.fontTiny);
     render.drawText("Today", config.fontTiny, config.black, (colWidth - width) / 2, startY);
 }
 
-function drawTomorrowWeather(render, config) {
+function drawTomorrowWeather(render, config, hourIndex) {
     const startY = config.heightHeader + 2
     const colWidth = 65
     const startX = render.width - colWidth - 2
@@ -83,23 +100,24 @@ function drawTomorrowWeather(render, config) {
     }
 }
 
-function drawForecast(render, config, now) {
+function drawForecast(render, config, hourIndex, now) {
     if (weather) {
-        const currentHour = now.getHours()
+        const currentHour = now.getHours() + 1
         for (let i = 0; i < 4; i++) {
-            const hour = currentHour + i + 1
+            const hour = hourIndex + i + 1
             const temp = weather.hourlyTemps[hour]
             const code = weather.hourlyCodes[hour]
             if (temp === undefined || code === undefined) {
                 console.log(`Failed hour ${i} with ${temp} and ${code}`)
                 return;
             }
-            drawForecastSlot(render, config, i, currentHour, hour, temp, code)
+            const forecastHour = currentHour + i
+            drawForecastSlot(render, config, i, forecastHour, temp, code)
         }
     }
 }
 
-function drawForecastSlot(render, config, i, currentHour, hour, temp, code) {
+function drawForecastSlot(render, config, i, forecastHour, temp, code) {
     const colWidth = 48
     const startY = render.height - config.heightRow - 2;
     const startX = 1 + (colWidth + 2) * i
@@ -108,10 +126,10 @@ function drawForecastSlot(render, config, i, currentHour, hour, temp, code) {
     render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
 
     let pm = "pm"
-    if (hour < 12) {
+    if (forecastHour < 12) {
         pm = "am"
     }
-    const hourDisplay = `${hour % 12 || 12}${pm}`;
+    const hourDisplay = `${forecastHour % 12 || 12}${pm}`;
     let width = render.getTextWidth(hourDisplay, config.fontTiny);
     render.drawText(hourDisplay, config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
 
