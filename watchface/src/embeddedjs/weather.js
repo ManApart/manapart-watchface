@@ -19,10 +19,6 @@ const message = new Message({
     },
 });
 
-export function setDrawCallback(callback) {
-    drawCallback = callback
-}
-
 export function requestWeather() {
     try {
         message.write(new Map([

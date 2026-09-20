@@ -1,14 +1,14 @@
 import Poco from "commodetto/Poco";
-import {drawHeader, setDrawCallback as headerCallback} from "./header-bar"
-import {drawWeather, requestWeather, setDrawCallback as weatherCallback} from "./weather"
+import {drawHeaderFull} from "./header-bar"
+import {drawWeather} from "./weather"
 
-let render = new Poco(screen);
+export const render = new Poco(screen);
 
-const config = {
+export const config = {
     black: render.makeColor(0, 0, 0),
     white: render.makeColor(255, 255, 255),
-    lightGray: render.makeColor(170,170,170),
-    gray: render.makeColor(85,85,85),
+    lightGray: render.makeColor(170, 170, 170),
+    gray: render.makeColor(85, 85, 85),
     green: render.makeColor(85, 255, 170),
     orange: render.makeColor(255, 170, 85),
     red: render.makeColor(255, 170, 170),
@@ -24,7 +24,7 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 let lastDate = new Date();
 
-function draw(event) {
+function drawFull(event) {
     try {
         const now = event?.date ?? lastDate;
         if (event?.date) lastDate = event.date;
@@ -32,14 +32,59 @@ function draw(event) {
         render.begin();
         render.fillRectangle(config.gray, 0, 0, render.width, render.height);
 
-        drawHeader(render, now, config)
+        drawHeaderFull(render, now, config)
         drawDateNames(render, now)
         drawTime(render, now)
         drawWeather(render, config, now)
 
+    } catch (e) {
+        console.log("Full Draw failed: " + e)
+    } finally {
         render.end();
-    }catch (e) {
-        console.log("Draw failed: " + e)
+    }
+}
+
+function drawDaily(event){
+    try {
+        const now = event?.date ?? lastDate;
+        if (event?.date) lastDate = event.date;
+        //TODO - only render this area
+        render.begin();
+        drawDateNames(render, now)
+        //TODO - header date
+        //TODO - forecast
+    } catch (e) {
+        console.log("Draw Time failed: " + e)
+    } finally {
+        render.end();
+    }
+}
+
+function drawHourly(event){
+    try {
+        const now = event?.date ?? lastDate;
+        if (event?.date) lastDate = event.date;
+        //TODO - only render this area
+        render.begin();
+        //TODO - current, forecast
+    } catch (e) {
+        console.log("Draw Time failed: " + e)
+    } finally {
+        render.end();
+    }
+}
+
+function drawMinutely(event) {
+    try {
+        const now = event?.date ?? lastDate;
+        if (event?.date) lastDate = event.date;
+        //TODO - only render this area
+        render.begin();
+        drawTime(render, now)
+    } catch (e) {
+        console.log("Draw Time failed: " + e)
+    } finally {
+        render.end();
     }
 }
 
@@ -71,9 +116,8 @@ function drawDateNames(render, now) {
 }
 
 
-watch.addEventListener("minutechange", draw);
-watch.addEventListener("hourchange", requestWeather);
-watch.addEventListener("resize", draw);
+watch.addEventListener("minutechange", drawMinutely);
+//TODO - think about caching / drawing if no request etc, requesting weather if it's been four hours etc
+watch.addEventListener("hourchange", drawHourly);
+watch.addEventListener("daychange", drawDaily);
 
-headerCallback(draw)
-weatherCallback(draw)
