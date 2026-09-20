@@ -5,3 +5,4 @@ node_modules/
 .venv
 __pycache__
 .planning/
+.lock-waf_linux_build
