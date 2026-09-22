@@ -1,5 +1,5 @@
 import Poco from "commodetto/Poco";
-import {drawHeaderFull} from "./header-bar"
+import {drawHeaderBattery, drawHeaderBluetooth, drawHeaderDate, drawHeaderFull} from "./header-bar"
 import {drawWeather} from "./weather"
 
 export const render = new Poco(screen);
@@ -24,24 +24,13 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 let lastDate = new Date();
 
-function drawFull(event) {
-    try {
-        const now = event?.date ?? lastDate;
-        if (event?.date) lastDate = event.date;
-
-        render.begin();
-        render.fillRectangle(config.gray, 0, 0, render.width, render.height);
-
-        drawHeaderFull(render, now, config)
-        drawDateNames(render, now)
-        drawTime(render, now)
-        drawWeather(render, config, now)
-
-    } catch (e) {
-        console.log("Full Draw failed: " + e)
-    } finally {
-        render.end();
-    }
+function drawInitial() {
+    render.begin();
+    render.fillRectangle(config.gray, 0, 0, render.width, render.height);
+    render.fillRectangle(config.green, 0, 0, render.width, config.heightHeader);
+    render.end()
+    drawHeaderBluetooth(true)
+    drawHeaderBattery()
 }
 
 function drawDaily(event){
@@ -50,9 +39,9 @@ function drawDaily(event){
         if (event?.date) lastDate = event.date;
         //TODO - only render this area
         render.begin();
-        drawDateNames(render, now)
-        //TODO - header date
-        //TODO - forecast
+        drawDateNames(now)
+        drawHeaderDate(now)
+        //TODO - tomorrow forecast
     } catch (e) {
         console.log("Draw Time failed: " + e)
     } finally {
@@ -105,7 +94,8 @@ function drawTime(render, now) {
         (render.width - width) / 2, timeY);
 }
 
-function drawDateNames(render, now) {
+function drawDateNames(now) {
+    console.log('date names')
     const dayName = DAYS[now.getDay()];
     const monthName = MONTHS[now.getMonth()];
     let width = render.getTextWidth(dayName, config.fontMedium);
@@ -121,3 +111,5 @@ watch.addEventListener("minutechange", drawMinutely);
 watch.addEventListener("hourchange", drawHourly);
 watch.addEventListener("daychange", drawDaily);
 
+
+drawInitial()
