@@ -68,7 +68,7 @@ export function drawHeaderBattery() {
 }
 
 function drawHeaderFull(now) {
-    render.begin();
+    render.begin(0, 0, render.width, config.heightHeader)
     render.fillRectangle(barColor, 0, 0, render.width, config.heightHeader);
     render.end()
     drawHeaderBluetooth(isConnected)

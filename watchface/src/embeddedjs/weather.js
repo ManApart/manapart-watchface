@@ -47,7 +47,7 @@ export function drawCurrentWeather(hourIndex) {
     const startY = config.heightHeader + 2
     const startX = 2
     const colWidth = 65
-    render.begin()
+    render.begin(startX, startY, colWidth, config.heightRow)
     if (weather) {
         let temp = weather.current.temp
         let code = weather.current.code
@@ -78,7 +78,7 @@ export function drawTomorrowWeather(hourIndex) {
     const startX = render.width - colWidth - 2
     const w = weather?.tomorrow
     //TODO - only redraw if different
-    render.begin()
+    render.begin(startX, startY, colWidth, config.heightRow)
     if (w) {
         const color = getWeatherColor(w.high, config)
         render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
@@ -99,7 +99,8 @@ export function drawTomorrowWeather(hourIndex) {
 
 export function drawHourlyForecast(hourIndex, now) {
     if (weather) {
-        render.begin()
+        const colWidth = 48
+        render.begin(1, render.height - config.heightRow - 2, 1 + (colWidth + 2) * 4, config.heightRow)
         const currentHour = now.getHours() + 1
         for (let i = 0; i < 4; i++) {
             const hour = hourIndex + i + 1

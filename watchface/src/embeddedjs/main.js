@@ -31,6 +31,8 @@ function drawInitial() {
         render.begin();
         render.fillRectangle(config.gray, 0, 0, render.width, render.height);
         render.fillRectangle(getHeaderBarColor(), 0, 0, render.width, config.heightHeader);
+        const boxHeight = render.height - config.heightHeader - (2 * config.heightRow) - 8
+        render.drawRoundRect(2, config.heightRow + config.heightHeader + 4, render.width - 4, boxHeight, config.white, 5);
         render.end()
         drawHeaderBluetooth(true)
         drawHeaderBattery()
@@ -43,12 +45,10 @@ function drawInitial() {
 function drawDaily(event) {
     try {
         const now = event?.date ?? lastDate;
-        if (event?.date) lastDate = event.date;
+        lastDate = now;
         drawDateNames(now)
         drawHeaderDate(now)
-        const weatherIndex = getWeatherHourIndex(now)
-        drawTomorrowWeather(weatherIndex)
-        //TODO - tomorrow forecast
+        drawTomorrowWeather(getWeatherHourIndex(now))
     } catch (e) {
         console.log("Draw daily failed: " + e)
         render.end();
@@ -58,7 +58,7 @@ function drawDaily(event) {
 function drawHourly(event) {
     try {
         const now = event?.date ?? lastDate;
-        if (event?.date) lastDate = event.date;
+        lastDate = now;
         const weatherIndex = getWeatherHourIndex(now)
         drawCurrentWeather(weatherIndex)
         drawHourlyForecast(weatherIndex, now)
@@ -71,7 +71,7 @@ function drawHourly(event) {
 function drawMinutely(event) {
     try {
         const now = event?.date ?? lastDate;
-        if (event?.date) lastDate = event.date;
+        lastDate = now;
         drawTime(now)
     } catch (e) {
         console.log("Draw minutely failed: " + e)
@@ -80,27 +80,22 @@ function drawMinutely(event) {
 }
 
 function drawTime(now) {
-    const startY = config.heightRow + config.heightHeader + 4
     const timeY = (render.height + config.heightHeader - config.fontLarge.height) / 2;
-    const boxHeight = render.height - config.heightHeader - (2 * config.heightRow) - 8
-
-    //TODO - move the background to init, only redraw text background + text
-    render.drawRoundRect(2, startY, render.width - 4, boxHeight, config.white, 5);
-    render.begin()
-
     let hours = now.getHours() % 12 || 12;
     const hoursStr = String(hours).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const timeStr = `${hoursStr}:${minutes}`;
 
     let width = render.getTextWidth(timeStr, config.fontLarge);
+    render.begin((render.width - width) / 2, timeY, width, config.fontLarge.height)
     render.drawText(timeStr, config.fontLarge, config.black,
         (render.width - width) / 2, timeY);
     render.end()
 }
 
 function drawDateNames(now) {
-    render.begin()
+    const colWidth = 65
+    render.begin(colWidth + 1, config.heightHeader + 1, colWidth, config.heightRow)
     const dayName = DAYS[now.getDay()];
     const monthName = MONTHS[now.getMonth()];
     let width = render.getTextWidth(dayName, config.fontMedium);
