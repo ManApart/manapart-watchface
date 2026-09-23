@@ -1,5 +1,6 @@
 import Message from "pebble/message";
 import Poco from "commodetto/Poco";
+import {config, render} from "./main";
 
 const disableCache = false
 const iconWidth = 50 * 0.7
@@ -30,7 +31,7 @@ export function requestWeather() {
 }
 
 //TODO -update current and possibly future based on stale time
-export function drawWeather(render, config, now) {
+export function getWeatherHourIndex(now) {
     let hourIndex = 0
     if (weather?.current) {
         let hour = now.getHours()
@@ -38,19 +39,15 @@ export function drawWeather(render, config, now) {
             hour += 12
         }
         hourIndex = hour - (weather?.current?.asOf ?? hour)
-        console.log('asof ' + weather?.current?.asOf)
-        console.log('hour ' + hour)
-        console.log('hourIndex' + hourIndex)
     }
-    drawCurrentWeather(render, config, hourIndex)
-    drawTomorrowWeather(render, config, hourIndex)
-    drawForecast(render, config, hourIndex, now)
+    return hourIndex
 }
 
-function drawCurrentWeather(render, config, hourIndex) {
+export function drawCurrentWeather(hourIndex) {
     const startY = config.heightHeader + 2
     const startX = 2
     const colWidth = 65
+    render.begin()
     if (weather) {
         let temp = weather.current.temp
         let code = weather.current.code
@@ -72,13 +69,16 @@ function drawCurrentWeather(render, config, hourIndex) {
     }
     let width = render.getTextWidth("Today", config.fontTiny);
     render.drawText("Today", config.fontTiny, config.black, (colWidth - width) / 2, startY);
+    render.end()
 }
 
-function drawTomorrowWeather(render, config, hourIndex) {
+export function drawTomorrowWeather(hourIndex) {
     const startY = config.heightHeader + 2
     const colWidth = 65
     const startX = render.width - colWidth - 2
     const w = weather?.tomorrow
+    //TODO - only redraw if different
+    render.begin()
     if (w) {
         const color = getWeatherColor(w.high, config)
         render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
@@ -94,10 +94,12 @@ function drawTomorrowWeather(render, config, hourIndex) {
         width = render.getTextWidth(weatherStr, config.fontSmall);
         render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
     }
+    render.end()
 }
 
-function drawForecast(render, config, hourIndex, now) {
+export function drawHourlyForecast(hourIndex, now) {
     if (weather) {
+        render.begin()
         const currentHour = now.getHours() + 1
         for (let i = 0; i < 4; i++) {
             const hour = hourIndex + i + 1
@@ -110,6 +112,7 @@ function drawForecast(render, config, hourIndex, now) {
             const forecastHour = currentHour + i
             drawForecastSlot(render, config, i, forecastHour, temp, code)
         }
+        render.end()
     }
 }
 
@@ -189,17 +192,21 @@ function saveWeather() {
     }
 }
 
+const weatherIcons = {
+    0: getIcon(7), // Sunny
+    48: getIcon(6), // Cloudy
+    57: getIcon(5), // Light Snow
+    67: getIcon(4), // Light Rain
+    75: getIcon(5), // Light Snow
+    77: getIcon(3), // Heavy Snow
+    82: getIcon(2), // Heavy Rain
+    86: getIcon(3), // Heavy Snow
+    99: getIcon(2), // Heavy Rain
+    3: getIcon(3), // Generic
+}
+
 function getWeatherIcon(code) {
-    if (code === 0) return getIcon(7); // Sunny
-    if (code <= 48) return getIcon(6); // Cloudy
-    if (code <= 57) return getIcon(5); // Light Snow
-    if (code <= 67) return getIcon(4); // Light Rain
-    if (code <= 75) return getIcon(5); // Light Snow
-    if (code <= 77) return getIcon(3); // Heavy Snow
-    if (code <= 82) return getIcon(2); // Heavy Rain
-    if (code <= 86) return getIcon(3); // Heavy Snow
-    if (code <= 99) return getIcon(2); // Heavy Rain
-    return getIcon(3); //Generic
+    return weatherIcons[code] ?? weatherIcons[3]
 }
 
 function getIcon(i) {

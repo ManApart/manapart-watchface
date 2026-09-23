@@ -64,25 +64,20 @@ export function drawHeaderBattery() {
     const batString = `${batteryPercent}%`
     let width = render.getTextWidth(batString, config.fontSmall);
     render.drawText(batString, config.fontSmall, config.black, render.width - width - 5, 0);
+    render.end()
 }
 
-export function drawHeaderFull(now) {
-    let barColor = getBarColor(batteryPercent);
-
+function drawHeaderFull(now) {
+    render.begin();
     render.fillRectangle(barColor, 0, 0, render.width, config.heightHeader);
-    if (isConnected) {
-        render.drawText("B", config.fontSmall, config.black, 5, 0);
-    }
-    const batString = `${batteryPercent}%`
-    let width = render.getTextWidth(batString, config.fontSmall);
-    render.drawText(batString, config.fontSmall, config.black, render.width - width - 5, 0);
+    render.end()
+    drawHeaderBluetooth(isConnected)
+    drawHeaderBattery()
+    drawHeaderDate(now)
+}
 
-    const date = now.getDate()
-    const month = now.getMonth()
-    const year = now.getFullYear().toString().slice(-2)
-    const dateStr = `${month}/${date}/${year}`;
-    width = render.getTextWidth(dateStr, config.fontSmall);
-    render.drawText(dateStr, config.fontSmall, config.black, (render.width - width) / 2, 0);
+export function getHeaderBarColor() {
+    return getBarColor(batteryPercent)
 }
 
 function getBarColor(batteryPercent) {

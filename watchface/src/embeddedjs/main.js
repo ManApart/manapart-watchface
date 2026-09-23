@@ -1,6 +1,6 @@
 import Poco from "commodetto/Poco";
-import {drawHeaderBattery, drawHeaderBluetooth, drawHeaderDate, drawHeaderFull} from "./header-bar"
-import {drawWeather} from "./weather"
+import {drawHeaderBattery, drawHeaderBluetooth, drawHeaderDate, getHeaderBarColor} from "./header-bar"
+import {drawCurrentWeather, drawHourlyForecast, drawTomorrowWeather, getWeatherHourIndex} from "./weather";
 
 export const render = new Poco(screen);
 
@@ -24,41 +24,46 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 let lastDate = new Date();
 
+//TODO - can we being in the sub things and just end in the finally? Can we end twice?
+//TODO - do a render.end in catch but let the pieces do the begin and end naturally
 function drawInitial() {
-    render.begin();
-    render.fillRectangle(config.gray, 0, 0, render.width, render.height);
-    render.fillRectangle(config.green, 0, 0, render.width, config.heightHeader);
-    render.end()
-    drawHeaderBluetooth(true)
-    drawHeaderBattery()
-}
-
-function drawDaily(event){
     try {
-        const now = event?.date ?? lastDate;
-        if (event?.date) lastDate = event.date;
-        //TODO - only render this area
         render.begin();
-        drawDateNames(now)
-        drawHeaderDate(now)
-        //TODO - tomorrow forecast
+        render.fillRectangle(config.gray, 0, 0, render.width, render.height);
+        render.fillRectangle(getHeaderBarColor(), 0, 0, render.width, config.heightHeader);
+        render.end()
+        drawHeaderBluetooth(true)
+        drawHeaderBattery()
     } catch (e) {
-        console.log("Draw Time failed: " + e)
-    } finally {
+        console.log("Draw initial failed: " + e)
         render.end();
     }
 }
 
-function drawHourly(event){
+function drawDaily(event) {
     try {
         const now = event?.date ?? lastDate;
         if (event?.date) lastDate = event.date;
-        //TODO - only render this area
-        render.begin();
-        //TODO - current, forecast
+        drawDateNames(now)
+        drawHeaderDate(now)
+        const weatherIndex = getWeatherHourIndex(now)
+        drawTomorrowWeather(weatherIndex)
+        //TODO - tomorrow forecast
     } catch (e) {
-        console.log("Draw Time failed: " + e)
-    } finally {
+        console.log("Draw daily failed: " + e)
+        render.end();
+    }
+}
+
+function drawHourly(event) {
+    try {
+        const now = event?.date ?? lastDate;
+        if (event?.date) lastDate = event.date;
+        const weatherIndex = getWeatherHourIndex(now)
+        drawCurrentWeather(weatherIndex)
+        drawHourlyForecast(weatherIndex, now)
+    } catch (e) {
+        console.log("Draw hourly failed: " + e)
         render.end();
     }
 }
@@ -67,22 +72,21 @@ function drawMinutely(event) {
     try {
         const now = event?.date ?? lastDate;
         if (event?.date) lastDate = event.date;
-        //TODO - only render this area
-        render.begin();
-        drawTime(render, now)
+        drawTime(now)
     } catch (e) {
-        console.log("Draw Time failed: " + e)
+        console.log("Draw minutely failed: " + e)
     } finally {
-        render.end();
     }
 }
 
-function drawTime(render, now) {
+function drawTime(now) {
     const startY = config.heightRow + config.heightHeader + 4
     const timeY = (render.height + config.heightHeader - config.fontLarge.height) / 2;
     const boxHeight = render.height - config.heightHeader - (2 * config.heightRow) - 8
 
+    //TODO - move the background to init, only redraw text background + text
     render.drawRoundRect(2, startY, render.width - 4, boxHeight, config.white, 5);
+    render.begin()
 
     let hours = now.getHours() % 12 || 12;
     const hoursStr = String(hours).padStart(2, "0");
@@ -92,10 +96,11 @@ function drawTime(render, now) {
     let width = render.getTextWidth(timeStr, config.fontLarge);
     render.drawText(timeStr, config.fontLarge, config.black,
         (render.width - width) / 2, timeY);
+    render.end()
 }
 
 function drawDateNames(now) {
-    console.log('date names')
+    render.begin()
     const dayName = DAYS[now.getDay()];
     const monthName = MONTHS[now.getMonth()];
     let width = render.getTextWidth(dayName, config.fontMedium);
@@ -103,6 +108,7 @@ function drawDateNames(now) {
     render.drawText(dayName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2);
     width = render.getTextWidth(monthName, config.fontMedium);
     render.drawText(monthName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2 + height);
+    render.end()
 }
 
 
