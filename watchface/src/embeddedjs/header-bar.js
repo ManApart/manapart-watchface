@@ -1,5 +1,5 @@
 import Battery from "embedded:sensor/Battery";
-import {config, render} from "./main";
+import {config, lastDate, log, render} from "./main";
 
 let batteryPercent = 100;
 let isConnected = true;
@@ -13,8 +13,8 @@ const battery = new Battery({
         }
         const batColor = getBarColor(batteryPercent)
         if (getBarColor(oldBat) !== batColor) {
-            console.log(`Battery Percent is ${batteryPercent}`)
-            drawHeaderFull(new Date())
+            log(`Battery Percent is ${batteryPercent}`)
+            drawHeaderFull(lastDate)
         } else {
             drawHeaderBattery()
         }
@@ -28,7 +28,7 @@ function checkConnection() {
     if (oldConnect === isConnected) {
         return
     }
-    console.log(`Bluetooth is connected: ${isConnected}`)
+    log(`Bluetooth is connected: ${isConnected}`)
     drawHeaderBluetooth(isConnected)
 }
 

@@ -1,11 +1,13 @@
 import Message from "pebble/message";
 import Poco from "commodetto/Poco";
-import {config, render} from "./main";
+import {config, lastDate, log, render} from "./main";
 
-const disableCache = false
 const iconWidth = 50 * 0.7
 let weather = null;
-let drawCallback;
+
+const weatherRequest = new Map([
+    ["weather_request", 1]
+])
 
 const message = new Message({
     input: 256,
@@ -20,13 +22,12 @@ const message = new Message({
     },
 });
 
+
 export function requestWeather() {
     try {
-        message.write(new Map([
-            ["weather_request", 1]
-        ]));
+        message.write(weatherRequest);
     } catch (e) {
-        console.log("Unable to request weather: " + String(e));
+        log("Unable to request weather: " + String(e));
     }
 }
 
@@ -35,10 +36,10 @@ export function getWeatherHourIndex(now) {
     let hourIndex = 0
     if (weather?.current) {
         let hour = now.getHours()
-        if (hour < weather?.current?.asOf) {
-            hour += 12
+        if (hour < weather?.asOf) {
+            hour += 24
         }
-        hourIndex = hour - (weather?.current?.asOf ?? hour)
+        hourIndex = hour - (weather?.asOf ?? hour)
     }
     return hourIndex
 }
@@ -72,15 +73,14 @@ export function drawCurrentWeather(hourIndex) {
     render.end()
 }
 
-export function drawTomorrowWeather(hourIndex) {
+export function drawTomorrowWeather() {
     const startY = config.heightHeader + 2
     const colWidth = 65
     const startX = render.width - colWidth - 2
     const w = weather?.tomorrow
-    //TODO - only redraw if different
-    render.begin(startX, startY, colWidth, config.heightRow)
     if (w) {
         const color = getWeatherColor(w.high, config)
+        render.begin(startX, startY, colWidth, config.heightRow)
         render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
 
         let width = render.getTextWidth("Tomorrow", config.fontTiny);
@@ -93,8 +93,8 @@ export function drawTomorrowWeather(hourIndex) {
         const weatherStr = `${w.low}°/${w.high}°`;
         width = render.getTextWidth(weatherStr, config.fontSmall);
         render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
+        render.end()
     }
-    render.end()
 }
 
 export function drawHourlyForecast(hourIndex, now) {
@@ -107,7 +107,7 @@ export function drawHourlyForecast(hourIndex, now) {
             const temp = weather.hourlyTemps[hour]
             const code = weather.hourlyCodes[hour]
             if (temp === undefined || code === undefined) {
-                console.log(`Failed hour ${i} with ${temp} and ${code}`)
+                log(`Failed hour ${i} with ${temp} and ${code}`)
                 return;
             }
             const forecastHour = currentHour + i
@@ -160,9 +160,10 @@ async function updateWeather(data) {
     weather = JSON.parse(data)
     if (weather) {
         saveWeather();
-    }
-    if (drawCallback) {
-        drawCallback()
+        const now = lastDate
+        const weatherIndex = getWeatherHourIndex(now)
+        drawCurrentWeather(weatherIndex)
+        drawHourlyForecast(weatherIndex, now)
     }
 }
 
@@ -170,16 +171,13 @@ function loadCachedWeather() {
     const cached = localStorage.getItem("weather");
     const cachedTime = localStorage.getItem("weatherTime");
 
-    if (!disableCache && cached && cachedTime) {
-        const age = Date.now() - Number(cachedTime);
-        if (age < 60 * 60 * 1000) {
-            try {
-                weather = JSON.parse(cached);
-                console.log("Using cached weather");
-                return true;
-            } catch (e) {
-                console.log("Failed to parse cached weather");
-            }
+    if (cached && cachedTime) {
+        try {
+            weather = JSON.parse(cached);
+            console.log("Using cached weather");
+            return true;
+        } catch (e) {
+            console.log("Failed to parse cached weather");
         }
     }
     return false;
@@ -189,7 +187,7 @@ function saveWeather() {
     if (weather) {
         localStorage.setItem("weather", JSON.stringify(weather));
         localStorage.setItem("weatherTime", String(Date.now()));
-        console.log('Saved Weather')
+        log('Saved Weather')
     }
 }
 

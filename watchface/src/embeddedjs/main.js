@@ -1,9 +1,14 @@
 import Poco from "commodetto/Poco";
 import {drawHeaderBattery, drawHeaderBluetooth, drawHeaderDate, getHeaderBarColor} from "./header-bar"
-import {drawCurrentWeather, drawHourlyForecast, drawTomorrowWeather, getWeatherHourIndex} from "./weather";
+import {
+    drawCurrentWeather,
+    drawHourlyForecast,
+    drawTomorrowWeather,
+    getWeatherHourIndex, requestWeather,
+} from "./weather";
 
+const testing = true
 export const render = new Poco(screen);
-
 export const config = {
     black: render.makeColor(0, 0, 0),
     white: render.makeColor(255, 255, 255),
@@ -22,7 +27,9 @@ export const config = {
 }
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-let lastDate = new Date();
+
+
+export let lastDate = new Date();
 
 //TODO - can we being in the sub things and just end in the finally? Can we end twice?
 //TODO - do a render.end in catch but let the pieces do the begin and end naturally
@@ -37,7 +44,7 @@ function drawInitial() {
         drawHeaderBluetooth(true)
         drawHeaderBattery()
     } catch (e) {
-        console.log("Draw initial failed: " + e)
+        log("Draw initial failed: " + e)
         render.end();
     }
 }
@@ -48,9 +55,9 @@ function drawDaily(event) {
         lastDate = now;
         drawDateNames(now)
         drawHeaderDate(now)
-        drawTomorrowWeather(getWeatherHourIndex(now))
+        drawTomorrowWeather()
     } catch (e) {
-        console.log("Draw daily failed: " + e)
+        log("Draw daily failed: " + e)
         render.end();
     }
 }
@@ -60,10 +67,14 @@ function drawHourly(event) {
         const now = event?.date ?? lastDate;
         lastDate = now;
         const weatherIndex = getWeatherHourIndex(now)
-        drawCurrentWeather(weatherIndex)
-        drawHourlyForecast(weatherIndex, now)
+        if (weatherIndex >= 5) {
+            requestWeather()
+        } else {
+            drawCurrentWeather(weatherIndex)
+            drawHourlyForecast(weatherIndex, now)
+        }
     } catch (e) {
-        console.log("Draw hourly failed: " + e)
+        log("Draw hourly failed: " + e)
         render.end();
     }
 }
@@ -74,7 +85,7 @@ function drawMinutely(event) {
         lastDate = now;
         drawTime(now)
     } catch (e) {
-        console.log("Draw minutely failed: " + e)
+        log("Draw minutely failed: " + e)
     } finally {
     }
 }
@@ -106,11 +117,12 @@ function drawDateNames(now) {
     render.end()
 }
 
+export function log(message) {
+    if (testing) console.log(message)
+}
 
 watch.addEventListener("minutechange", drawMinutely);
-//TODO - think about caching / drawing if no request etc, requesting weather if it's been four hours etc
 watch.addEventListener("hourchange", drawHourly);
 watch.addEventListener("daychange", drawDaily);
-
 
 drawInitial()

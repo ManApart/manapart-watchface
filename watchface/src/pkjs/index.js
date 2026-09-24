@@ -16,7 +16,7 @@ function getLocation() {
         {
             enableHighAccuracy: false,
             maximumAge:
-                24 * 60 * 1000,
+                24 * 60 * 60 * 1000,
             timeout:
                 10000
         }
@@ -93,7 +93,6 @@ function testWeather() {
     );
 }
 
-Pebble.addEventListener("ready", getLocation);
 Pebble.addEventListener("appmessage", function (event) {
     if (event.payload.weather_request) {
         getLocation()
