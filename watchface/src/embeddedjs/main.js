@@ -100,6 +100,7 @@ function drawTime(now) {
 
     let width = render.getTextWidth(timeStr, config.fontLarge);
     render.begin((render.width - width) / 2, timeY, width, config.fontLarge.height)
+    render.fillRectangle(config.white,(render.width - width) / 2, timeY, width, config.fontLarge.height)
     render.drawText(timeStr, config.fontLarge, config.black,
         (render.width - width) / 2, timeY);
     render.end()
