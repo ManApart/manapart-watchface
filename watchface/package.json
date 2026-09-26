@@ -2,7 +2,9 @@
   "name": "manapart-face",
   "author": "Manapart",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
   "dependencies": {
     "@rebble/clay": "^1.1.0"
@@ -68,5 +70,8 @@
         }
       ]
     }
+  },
+  "devDependencies": {
+    "@moddable/typings": "^9.5.0"
   }
 }
