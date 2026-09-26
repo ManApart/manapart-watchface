@@ -25,6 +25,7 @@
       "watchface": true
     },
     "messageKeys": [
+      "ready",
       "weather",
       "weather_request"
     ],

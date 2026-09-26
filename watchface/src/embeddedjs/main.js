@@ -4,7 +4,8 @@ import {
     drawCurrentWeather,
     drawHourlyForecast,
     drawTomorrowWeather,
-    getWeatherHourIndex, requestWeather,
+    getWeatherHourIndex,
+    requestWeather,
 } from "./weather";
 
 const testing = true
@@ -67,7 +68,7 @@ function drawHourly(event) {
         const now = event?.date ?? lastDate;
         lastDate = now;
         const weatherIndex = getWeatherHourIndex(now)
-        if (weatherIndex >= 5) {
+        if (weatherIndex >= 5 || weatherIndex < 0) {
             requestWeather()
         } else {
             drawCurrentWeather(weatherIndex)
@@ -124,5 +125,6 @@ export function log(message) {
 watch.addEventListener("minutechange", drawMinutely);
 watch.addEventListener("hourchange", drawHourly);
 watch.addEventListener("daychange", drawDaily);
+
 
 drawInitial()

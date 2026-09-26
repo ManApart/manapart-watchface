@@ -1,13 +1,8 @@
-const testing = false
-
 function getLocation() {
     navigator.geolocation.getCurrentPosition(
         function (pos) {
-            if (testing) {
-                testWeather()
-            } else {
-                fetchWeather(pos.coords.latitude, pos.coords.longitude);
-            }
+            // testWeather()
+            fetchWeather(pos.coords.latitude, pos.coords.longitude);
         },
 
         function (err) {
@@ -36,8 +31,8 @@ function fetchWeather(latitude, longitude) {
         }
 
         try {
-            const start = new Date().getHours();
             const data = JSON.parse(request.responseText);
+            const start = parseInt(data.current.time.slice(11, 13));
             const weather = {
                 asOf: start,
                 current: {
@@ -97,4 +92,8 @@ Pebble.addEventListener("appmessage", function (event) {
     if (event.payload.weather_request) {
         getLocation()
     }
+});
+
+Pebble.addEventListener("ready", function () {
+    Pebble.sendAppMessage({ready: 1});
 });

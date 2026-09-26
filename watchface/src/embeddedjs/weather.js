@@ -4,6 +4,8 @@ import {config, lastDate, log, render} from "./main";
 
 const iconWidth = 50 * 0.7
 let weather = null;
+let messageWriteable = false;
+let weatherRequestPending = false;
 
 const weatherRequest = new Map([
     ["weather_request", 1]
@@ -12,7 +14,15 @@ const weatherRequest = new Map([
 const message = new Message({
     input: 256,
     output: 256,
-    keys: ["weather", "weather_request"],
+    keys: ["ready", "weather", "weather_request"],
+
+    onWritable() {
+        messageWriteable = true;
+        sendWeatherRequestIfPending();
+    },
+    onSuspend() {
+        messageWriteable = false;
+    },
 
     onReadable() {
         const values = this.read();
@@ -24,24 +34,35 @@ const message = new Message({
 
 
 export function requestWeather() {
+    weatherRequestPending = true
+    sendWeatherRequestIfPending()
+}
+
+function sendWeatherRequestIfPending() {
+    // log(`Pending: ${weatherRequestPending}, writable: ${messageWriteable}, connected: ${watch.connected.pebblekit}, decision: ${weatherRequestPending && messageWriteable && watch.connected.pebblekit}`)
+    if (!weatherRequestPending || !messageWriteable || !watch.connected.pebblekit) {
+        return;
+    }
     try {
         message.write(weatherRequest);
+        weatherRequestPending = false;
     } catch (e) {
+        messageWriteable = false;
         log("Unable to request weather: " + String(e));
     }
 }
 
-//TODO -update current and possibly future based on stale time
 export function getWeatherHourIndex(now) {
-    let hourIndex = 0
-    if (weather?.current) {
-        let hour = now.getHours()
+    if (weather?.asOf) {
+        let hour = now.getHours();
         if (hour < weather?.asOf) {
-            hour += 24
+            hour += 24;
         }
-        hourIndex = hour - (weather?.asOf ?? hour)
+        log(`Hour: ${hour}, asOf: ${weather?.asOf}`)
+        return hour - (weather?.asOf ?? hour);
+    } else {
+        return -1;
     }
-    return hourIndex
 }
 
 export function drawCurrentWeather(hourIndex) {
@@ -164,14 +185,13 @@ async function updateWeather(data) {
         const weatherIndex = getWeatherHourIndex(now)
         drawCurrentWeather(weatherIndex)
         drawHourlyForecast(weatherIndex, now)
+        drawTomorrowWeather()
     }
 }
 
 function loadCachedWeather() {
     const cached = localStorage.getItem("weather");
-    const cachedTime = localStorage.getItem("weatherTime");
-
-    if (cached && cachedTime) {
+    if (cached) {
         try {
             weather = JSON.parse(cached);
             console.log("Using cached weather");
@@ -180,32 +200,42 @@ function loadCachedWeather() {
             console.log("Failed to parse cached weather");
         }
     }
+    console.log('no weather cached')
     return false;
 }
 
 function saveWeather() {
     if (weather) {
         localStorage.setItem("weather", JSON.stringify(weather));
-        localStorage.setItem("weatherTime", String(Date.now()));
         log('Saved Weather')
     }
 }
 
 const weatherIcons = {
-    0: getIcon(7), // Sunny
-    48: getIcon(6), // Cloudy
-    57: getIcon(5), // Light Snow
-    67: getIcon(4), // Light Rain
-    75: getIcon(5), // Light Snow
-    77: getIcon(3), // Heavy Snow
-    82: getIcon(2), // Heavy Rain
-    86: getIcon(3), // Heavy Snow
-    99: getIcon(2), // Heavy Rain
-    3: getIcon(3), // Generic
+    partlyCloudy: getIcon(1),
+    heavyRain: getIcon(2),
+    heavySnow: getIcon(3),
+    lightRain: getIcon(4),
+    lightSnow: getIcon(5),
+    cloudy: getIcon(6),
+    sunny: getIcon(7),
 }
 
 function getWeatherIcon(code) {
-    return weatherIcons[code] ?? weatherIcons[3]
+    if (code === 0) return weatherIcons.sunny;
+    if (code <= 3) return weatherIcons.cloudy;
+    if (code <= 48) return weatherIcons.lightRain;
+    if (code <= 55) return weatherIcons.lightRain;
+    if (code <= 57) return weatherIcons.lightSnow;
+    if (code <= 65) return weatherIcons.lightRain;
+    if (code <= 67) return weatherIcons.lightSnow;
+    if (code <= 75) return weatherIcons.lightSnow;
+    if (code <= 77) return weatherIcons.lightSnow;
+    if (code <= 82) return weatherIcons.heavyRain;
+    if (code <= 86) return weatherIcons.heavySnow;
+    if (code === 95) return weatherIcons.heavyRain;
+    if (code <= 99) return weatherIcons.heavyRain;
+    return weatherIcons.partlyCloudy;
 }
 
 function getIcon(i) {
