@@ -24,3 +24,12 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python tools/svg2pdc.py watchface/resources/cloudy.svg
 ```
+
+## Commands
+
+```
+pebble emu-battery --percent 80
+pebble emu-bt-connection --connected no
+pebble emu-set-timeline-quick-view on
+BROWSER='firefox --new-tab %s' pebble emu-app-config
+```

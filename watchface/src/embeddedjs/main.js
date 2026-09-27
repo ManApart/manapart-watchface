@@ -1,5 +1,5 @@
 import Poco from "commodetto/Poco";
-import {drawHeaderBattery, drawHeaderBluetooth, drawHeaderDate, getHeaderBarColor} from "./header-bar"
+import {checkConnection, drawHeaderBattery, drawHeaderBluetooth, drawHeaderDate, getHeaderBarColor} from "./header-bar"
 import {
     drawCurrentWeather,
     drawHourlyForecast,
@@ -42,8 +42,8 @@ function drawInitial() {
         const boxHeight = render.height - config.heightHeader - (2 * config.heightRow) - 8
         render.drawRoundRect(2, config.heightRow + config.heightHeader + 4, render.width - 4, boxHeight, config.white, 5);
         render.end()
-        drawHeaderBluetooth(true)
         drawHeaderBattery()
+        drawHeaderBluetooth()
     } catch (e) {
         log("Draw initial failed: " + e)
         render.end();
@@ -100,7 +100,7 @@ function drawTime(now) {
 
     let width = render.getTextWidth(timeStr, config.fontLarge);
     render.begin((render.width - width) / 2, timeY, width, config.fontLarge.height)
-    render.fillRectangle(config.white,(render.width - width) / 2, timeY, width, config.fontLarge.height)
+    render.fillRectangle(config.white, (render.width - width) / 2, timeY, width, config.fontLarge.height)
     render.drawText(timeStr, config.fontLarge, config.black,
         (render.width - width) / 2, timeY);
     render.end()
@@ -109,6 +109,7 @@ function drawTime(now) {
 function drawDateNames(now) {
     const colWidth = 65
     render.begin(colWidth + 1, config.heightHeader + 1, colWidth, config.heightRow)
+    render.fillRectangle(config.gray, colWidth + 1, config.heightHeader + 1, colWidth, config.heightRow)
     const dayName = DAYS[now.getDay()];
     const monthName = MONTHS[now.getMonth()];
     let width = render.getTextWidth(dayName, config.fontMedium);
@@ -127,5 +128,5 @@ watch.addEventListener("minutechange", drawMinutely);
 watch.addEventListener("hourchange", drawHourly);
 watch.addEventListener("daychange", drawDaily);
 
-
+checkConnection()
 drawInitial()

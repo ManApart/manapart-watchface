@@ -14,7 +14,7 @@ const battery = new Battery({
         const batColor = getBarColor(batteryPercent)
         if (getBarColor(oldBat) !== batColor) {
             log(`Battery Percent is ${batteryPercent}`)
-            drawHeaderFull(lastDate)
+            drawHeaderFull(lastDate, batColor)
         } else {
             drawHeaderBattery()
         }
@@ -22,17 +22,18 @@ const battery = new Battery({
 });
 batteryPercent = battery.sample().percent;
 
-function checkConnection() {
+export function checkConnection() {
     const oldConnect = isConnected
+    log(`old: ${isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
     isConnected = watch.connected.app;
     if (oldConnect === isConnected) {
         return
     }
     log(`Bluetooth is connected: ${isConnected}`)
-    drawHeaderBluetooth(isConnected)
+    drawHeaderBluetooth()
 }
 
-export function drawHeaderBluetooth(isConnected) {
+export function drawHeaderBluetooth() {
     let barColor = getBarColor(batteryPercent);
     render.begin(0, 0, 20, config.heightHeader)
     render.fillRectangle(barColor, 0, 0, render.width, config.heightHeader);
@@ -67,11 +68,11 @@ export function drawHeaderBattery() {
     render.end()
 }
 
-function drawHeaderFull(now) {
+function drawHeaderFull(now, batColor) {
     render.begin(0, 0, render.width, config.heightHeader)
-    render.fillRectangle(barColor, 0, 0, render.width, config.heightHeader);
+    render.fillRectangle(batColor, 0, 0, render.width, config.heightHeader);
     render.end()
-    drawHeaderBluetooth(isConnected)
+    drawHeaderBluetooth()
     drawHeaderBattery()
     drawHeaderDate(now)
 }

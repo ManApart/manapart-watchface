@@ -58,7 +58,6 @@ export function getWeatherHourIndex(now) {
         if (hour < weather?.asOf) {
             hour += 24;
         }
-        log(`Hour: ${hour}, asOf: ${weather?.asOf}`)
         return hour - (weather?.asOf ?? hour);
     } else {
         return -1;
