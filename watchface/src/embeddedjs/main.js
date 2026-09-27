@@ -70,6 +70,10 @@ function drawHourly(event) {
         const weatherIndex = getWeatherHourIndex(now)
         if (weatherIndex >= 5 || weatherIndex < 0) {
             requestWeather()
+            if (!watch.connected.app) {
+                drawCurrentWeather(weatherIndex)
+                drawHourlyForecast(weatherIndex, now)
+            }
         } else {
             drawCurrentWeather(weatherIndex)
             drawHourlyForecast(weatherIndex, now)

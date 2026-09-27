@@ -34,7 +34,7 @@ function fetchWeather(latitude, longitude) {
             const data = JSON.parse(request.responseText);
             const start = parseInt(data.current.time.slice(11, 13));
             const weather = {
-                asOf: start,
+                asOf: data.current.time,
                 current: {
                     temp: Math.round(data.current.temperature_2m),
                     code: data.current.weather_code,

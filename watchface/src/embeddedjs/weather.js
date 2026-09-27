@@ -54,11 +54,8 @@ function sendWeatherRequestIfPending() {
 
 export function getWeatherHourIndex(now) {
     if (weather?.asOf) {
-        let hour = now.getHours();
-        if (hour < weather?.asOf) {
-            hour += 24;
-        }
-        return hour - (weather?.asOf ?? hour);
+        const ageHours = (now.getTime() - new Date(weather.asOf).getTime()) / (60 * 60 * 1000);
+        return Math.floor(ageHours);
     } else {
         return -1;
     }
@@ -88,8 +85,8 @@ export function drawCurrentWeather(hourIndex) {
         render.drawRoundRect(startX, startY, colWidth, config.heightRow, config.lightGray, 5);
         render.drawText("No Data", config.fontSmall, config.black, 10, startY + config.fontTiny.height);
     }
-    let width = render.getTextWidth("Today", config.fontTiny);
-    render.drawText("Today", config.fontTiny, config.black, (colWidth - width) / 2, startY);
+    let width = render.getTextWidth("Now", config.fontTiny);
+    render.drawText("Now", config.fontTiny, config.black, (colWidth - width) / 2, startY);
     render.end()
 }
 
@@ -126,10 +123,6 @@ export function drawHourlyForecast(hourIndex, now) {
             const hour = hourIndex + i + 1
             const temp = weather.hourlyTemps[hour]
             const code = weather.hourlyCodes[hour]
-            if (temp === undefined || code === undefined) {
-                log(`Failed hour ${i} with ${temp} and ${code}`)
-                return;
-            }
             const forecastHour = currentHour + i
             drawForecastSlot(render, config, i, forecastHour, temp, code)
         }
@@ -153,13 +146,14 @@ function drawForecastSlot(render, config, i, forecastHour, temp, code) {
     let width = render.getTextWidth(hourDisplay, config.fontTiny);
     render.drawText(hourDisplay, config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
 
-    let y = startY + config.fontTiny.height
-    render.drawDCI(getWeatherIcon(code), startX + (colWidth - iconWidth) / 2, y);
-    y += 28
-    const weatherStr = `${temp}°`;
-    width = render.getTextWidth(weatherStr, config.fontSmall);
-    render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
-
+    if (temp !== undefined && code !== undefined) {
+        let y = startY + config.fontTiny.height
+        render.drawDCI(getWeatherIcon(code), startX + (colWidth - iconWidth) / 2, y);
+        y += 28
+        const weatherStr = `${temp}°`;
+        width = render.getTextWidth(weatherStr, config.fontSmall);
+        render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
+    }
 }
 
 function getWeatherColor(temp, config) {

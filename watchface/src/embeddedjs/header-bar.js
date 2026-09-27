@@ -24,12 +24,11 @@ batteryPercent = battery.sample().percent;
 
 export function checkConnection() {
     const oldConnect = isConnected
-    log(`old: ${isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
     isConnected = watch.connected.app;
     if (oldConnect === isConnected) {
         return
     }
-    log(`Bluetooth is connected: ${isConnected}`)
+    log(`Bluetooth old: ${isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
     drawHeaderBluetooth()
 }
 
