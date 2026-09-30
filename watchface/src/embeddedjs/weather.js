@@ -116,8 +116,7 @@ export function drawTomorrowWeather() {
 
 export function drawHourlyForecast(hourIndex, now) {
     if (weather) {
-        const colWidth = 48
-        render.begin(1, render.height - config.heightRow - 2, 1 + (colWidth + 2) * 4, config.heightRow)
+        render.begin(1, render.height - config.heightRow - 2, render.width, config.heightRow)
         const currentHour = now.getHours() + 1
         for (let i = 0; i < 4; i++) {
             const hour = hourIndex + i + 1

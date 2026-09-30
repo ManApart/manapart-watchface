@@ -97,7 +97,10 @@ function drawMinutely(event) {
 
 function drawTime(now) {
     const timeY = (render.height + config.heightHeader - config.fontLarge.height) / 2;
-    let hours = now.getHours() % 12 || 12;
+    let hours = now.getHours();
+    if (watch.hour12) {
+        hours = hours % 12 || 12;
+    }
     const hoursStr = String(hours).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const timeStr = `${hoursStr}:${minutes}`;

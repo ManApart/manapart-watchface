@@ -1,5 +1,6 @@
 import Battery from "embedded:sensor/Battery";
 import {config, lastDate, log, render} from "./main";
+import {getWeatherHourIndex, requestWeather} from "./weather";
 
 let batteryPercent = 100;
 let isConnected = true;
@@ -30,6 +31,12 @@ export function checkConnection() {
     }
     log(`Bluetooth old: ${isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
     drawHeaderBluetooth()
+    if (isConnected){
+        const weatherIndex = getWeatherHourIndex(lastDate)
+        if (weatherIndex >= 5 || weatherIndex < 0) {
+            requestWeather()
+        }
+    }
 }
 
 export function drawHeaderBluetooth() {
