@@ -1,6 +1,6 @@
 import Message from "pebble/message";
 import Poco from "commodetto/Poco";
-import {config, lastDate, log, render} from "./main";
+import {config, lastDate, log, render, withEndRender} from "./main";
 
 const iconWidth = 50 * 0.7
 let weather = null;
@@ -65,29 +65,30 @@ export function drawCurrentWeather(hourIndex) {
     const startY = config.heightHeader + 2
     const startX = 2
     const colWidth = 65
-    render.begin(startX, startY, colWidth, config.heightRow)
-    if (weather) {
-        let temp = weather.current.temp
-        let code = weather.current.code
-        if (hourIndex !== 0) {
-            temp = weather.hourlyTemps[hourIndex] ?? weather.hourlyTemps.slice(-1)[0]
-            code = weather.hourlyCodes[hourIndex] ?? weather.hourlyCodes.slice(-1)[0]
+    withEndRender(() => {
+        render.begin(startX, startY, colWidth, config.heightRow)
+        if (weather) {
+            let temp = weather.current.temp
+            let code = weather.current.code
+            if (hourIndex !== 0) {
+                temp = weather.hourlyTemps[hourIndex] ?? weather.hourlyTemps.slice(-1)[0]
+                code = weather.hourlyCodes[hourIndex] ?? weather.hourlyCodes.slice(-1)[0]
+            }
+            const color = getWeatherColor(temp, config)
+            render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
+            let y = startY + config.fontTiny.height
+            render.drawDCI(getWeatherIcon(code), (colWidth - iconWidth) / 2, y);
+            y += 28
+            const weatherStr = `${temp}°F`;
+            let width = render.getTextWidth(weatherStr, config.fontSmall);
+            render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, y);
+        } else {
+            render.drawRoundRect(startX, startY, colWidth, config.heightRow, config.lightGray, 5);
+            render.drawText("No Data", config.fontSmall, config.black, 10, startY + config.fontTiny.height);
         }
-        const color = getWeatherColor(temp, config)
-        render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
-        let y = startY + config.fontTiny.height
-        render.drawDCI(getWeatherIcon(code), (colWidth - iconWidth) / 2, y);
-        y += 28
-        const weatherStr = `${temp}°F`;
-        let width = render.getTextWidth(weatherStr, config.fontSmall);
-        render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, y);
-    } else {
-        render.drawRoundRect(startX, startY, colWidth, config.heightRow, config.lightGray, 5);
-        render.drawText("No Data", config.fontSmall, config.black, 10, startY + config.fontTiny.height);
-    }
-    let width = render.getTextWidth("Now", config.fontTiny);
-    render.drawText("Now", config.fontTiny, config.black, (colWidth - width) / 2, startY);
-    render.end()
+        let width = render.getTextWidth("Now", config.fontTiny);
+        render.drawText("Now", config.fontTiny, config.black, (colWidth - width) / 2, startY);
+    })
 }
 
 export function drawTomorrowWeather() {
@@ -96,36 +97,38 @@ export function drawTomorrowWeather() {
     const startX = render.width - colWidth - 2
     const w = weather?.tomorrow
     if (w) {
-        const color = getWeatherColor(w.high, config)
-        render.begin(startX, startY, colWidth, config.heightRow)
-        render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
+        withEndRender(() => {
+            const color = getWeatherColor(w.high, config)
+            render.begin(startX, startY, colWidth, config.heightRow)
+            render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
 
-        let width = render.getTextWidth("Tomorrow", config.fontTiny);
-        render.drawText("Tomorrow", config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
+            let width = render.getTextWidth("Tomorrow", config.fontTiny);
+            render.drawText("Tomorrow", config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
 
-        let y = startY + config.fontTiny.height
-        render.drawDCI(getWeatherIcon(w.code), startX + (colWidth - iconWidth) / 2, y);
+            let y = startY + config.fontTiny.height
+            render.drawDCI(getWeatherIcon(w.code), startX + (colWidth - iconWidth) / 2, y);
 
-        y += 28
-        const weatherStr = `${w.low}°/${w.high}°`;
-        width = render.getTextWidth(weatherStr, config.fontSmall);
-        render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
-        render.end()
+            y += 28
+            const weatherStr = `${w.low}°/${w.high}°`;
+            width = render.getTextWidth(weatherStr, config.fontSmall);
+            render.drawText(weatherStr, config.fontSmall, config.black, startX + (colWidth - width) / 2, y);
+        })
     }
 }
 
 export function drawHourlyForecast(hourIndex, now) {
     if (weather) {
-        render.begin(1, render.height - config.heightRow - 2, render.width, config.heightRow)
-        const currentHour = now.getHours() + 1
-        for (let i = 0; i < 4; i++) {
-            const hour = hourIndex + i + 1
-            const temp = weather.hourlyTemps[hour]
-            const code = weather.hourlyCodes[hour]
-            const forecastHour = currentHour + i
-            drawForecastSlot(render, config, i, forecastHour, temp, code)
-        }
-        render.end()
+        withEndRender(() => {
+            render.begin(1, render.height - config.heightRow - 2, render.width, config.heightRow)
+            const currentHour = now.getHours() + 1
+            for (let i = 0; i < 4; i++) {
+                const hour = hourIndex + i + 1
+                const temp = weather.hourlyTemps[hour]
+                const code = weather.hourlyCodes[hour]
+                const forecastHour = currentHour + i
+                drawForecastSlot(render, config, i, forecastHour, temp, code)
+            }
+        })
     }
 }
 

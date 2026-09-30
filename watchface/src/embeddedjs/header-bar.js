@@ -1,6 +1,5 @@
 import Battery from "embedded:sensor/Battery";
-import {config, lastDate, log, render} from "./main";
-import {getWeatherHourIndex, requestWeather} from "./weather";
+import {config, lastDate, log, render, withEndRender} from "./main";
 
 let batteryPercent = 100;
 let isConnected = true;
@@ -31,22 +30,17 @@ export function checkConnection() {
     }
     log(`Bluetooth old: ${isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
     drawHeaderBluetooth()
-    if (isConnected){
-        const weatherIndex = getWeatherHourIndex(lastDate)
-        if (weatherIndex >= 5 || weatherIndex < 0) {
-            requestWeather()
-        }
-    }
 }
 
 export function drawHeaderBluetooth() {
     let barColor = getBarColor(batteryPercent);
-    render.begin(0, 0, 20, config.heightHeader)
-    render.fillRectangle(barColor, 0, 0, render.width, config.heightHeader);
-    if (isConnected) {
-        render.drawText("B", config.fontSmall, config.black, 5, 0);
-    }
-    render.end()
+    withEndRender(() => {
+        render.begin(0, 0, 20, config.heightHeader)
+        render.fillRectangle(barColor, 0, 0, render.width, config.heightHeader);
+        if (isConnected) {
+            render.drawText("B", config.fontSmall, config.black, 5, 0);
+        }
+    })
 }
 
 export function drawHeaderDate(now) {
@@ -57,27 +51,30 @@ export function drawHeaderDate(now) {
     const dateStr = `${month}/${date}/${year}`;
     let width = render.getTextWidth(dateStr, config.fontSmall);
     const start = render.width / 2 - 50
-    render.begin(start, 0, 100, config.heightHeader)
-    render.fillRectangle(barColor, start, 0, 100, config.heightHeader);
-    render.drawText(dateStr, config.fontSmall, config.black, (render.width - width) / 2, 0);
-    render.end()
+    withEndRender(() => {
+        render.begin(start, 0, 100, config.heightHeader)
+        render.fillRectangle(barColor, start, 0, 100, config.heightHeader);
+        render.drawText(dateStr, config.fontSmall, config.black, (render.width - width) / 2, 0);
+    })
 }
 
 export function drawHeaderBattery() {
     let barColor = getBarColor(batteryPercent);
     const barWidth = 40
-    render.begin(render.width - barWidth, 0, barWidth, config.heightHeader)
-    render.fillRectangle(barColor, render.width - barWidth, 0, barWidth, config.heightHeader);
-    const batString = `${batteryPercent}%`
-    let width = render.getTextWidth(batString, config.fontSmall);
-    render.drawText(batString, config.fontSmall, config.black, render.width - width - 5, 0);
-    render.end()
+    withEndRender(() => {
+        render.begin(render.width - barWidth, 0, barWidth, config.heightHeader)
+        render.fillRectangle(barColor, render.width - barWidth, 0, barWidth, config.heightHeader);
+        const batString = `${batteryPercent}%`
+        let width = render.getTextWidth(batString, config.fontSmall);
+        render.drawText(batString, config.fontSmall, config.black, render.width - width - 5, 0);
+    })
 }
 
 function drawHeaderFull(now, batColor) {
-    render.begin(0, 0, render.width, config.heightHeader)
-    render.fillRectangle(batColor, 0, 0, render.width, config.heightHeader);
-    render.end()
+    withEndRender(() => {
+        render.begin(0, 0, render.width, config.heightHeader)
+        render.fillRectangle(batColor, 0, 0, render.width, config.heightHeader);
+    })
     drawHeaderBluetooth()
     drawHeaderBattery()
     drawHeaderDate(now)

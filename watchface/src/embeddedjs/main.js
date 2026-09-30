@@ -32,67 +32,46 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 export let lastDate = new Date();
 
-//TODO - can we being in the sub things and just end in the finally? Can we end twice?
-//TODO - do a render.end in catch but let the pieces do the begin and end naturally
 function drawInitial() {
-    try {
+    withEndRender(() => {
         render.begin();
         render.fillRectangle(config.gray, 0, 0, render.width, render.height);
         render.fillRectangle(getHeaderBarColor(), 0, 0, render.width, config.heightHeader);
         const boxHeight = render.height - config.heightHeader - (2 * config.heightRow) - 8
         render.drawRoundRect(2, config.heightRow + config.heightHeader + 4, render.width - 4, boxHeight, config.white, 5);
-        render.end()
         drawHeaderBattery()
         drawHeaderBluetooth()
-    } catch (e) {
-        log("Draw initial failed: " + e)
-        render.end();
-    }
+    })
 }
 
 function drawDaily(event) {
-    try {
-        const now = event?.date ?? lastDate;
-        lastDate = now;
-        drawDateNames(now)
-        drawHeaderDate(now)
-        drawTomorrowWeather()
-    } catch (e) {
-        log("Draw daily failed: " + e)
-        render.end();
-    }
+    const now = event?.date ?? lastDate;
+    lastDate = now;
+    drawDateNames(now)
+    drawHeaderDate(now)
+    drawTomorrowWeather()
 }
 
 function drawHourly(event) {
-    try {
-        const now = event?.date ?? lastDate;
-        lastDate = now;
-        const weatherIndex = getWeatherHourIndex(now)
-        if (weatherIndex >= 5 || weatherIndex < 0) {
-            requestWeather()
-            if (!watch.connected.app) {
-                drawCurrentWeather(weatherIndex)
-                drawHourlyForecast(weatherIndex, now)
-            }
-        } else {
+    const now = event?.date ?? lastDate;
+    lastDate = now;
+    const weatherIndex = getWeatherHourIndex(now)
+    if (weatherIndex >= 5 || weatherIndex < 0) {
+        requestWeather()
+        if (!watch.connected.app) {
             drawCurrentWeather(weatherIndex)
             drawHourlyForecast(weatherIndex, now)
         }
-    } catch (e) {
-        log("Draw hourly failed: " + e)
-        render.end();
+    } else {
+        drawCurrentWeather(weatherIndex)
+        drawHourlyForecast(weatherIndex, now)
     }
 }
 
 function drawMinutely(event) {
-    try {
-        const now = event?.date ?? lastDate;
-        lastDate = now;
-        drawTime(now)
-    } catch (e) {
-        log("Draw minutely failed: " + e)
-    } finally {
-    }
+    const now = event?.date ?? lastDate;
+    lastDate = now;
+    drawTime(now)
 }
 
 function drawTime(now) {
@@ -106,29 +85,40 @@ function drawTime(now) {
     const timeStr = `${hoursStr}:${minutes}`;
 
     let width = render.getTextWidth(timeStr, config.fontLarge);
-    render.begin((render.width - width) / 2, timeY, width, config.fontLarge.height)
-    render.fillRectangle(config.white, (render.width - width) / 2, timeY, width, config.fontLarge.height)
-    render.drawText(timeStr, config.fontLarge, config.black,
-        (render.width - width) / 2, timeY);
-    render.end()
+    withEndRender(() => {
+        render.begin((render.width - width) / 2, timeY, width, config.fontLarge.height)
+        render.fillRectangle(config.white, (render.width - width) / 2, timeY, width, config.fontLarge.height)
+        render.drawText(timeStr, config.fontLarge, config.black,
+            (render.width - width) / 2, timeY);
+    })
 }
 
 function drawDateNames(now) {
     const colWidth = 65
-    render.begin(colWidth + 1, config.heightHeader + 1, colWidth, config.heightRow)
-    render.fillRectangle(config.gray, colWidth + 1, config.heightHeader + 1, colWidth, config.heightRow)
     const dayName = DAYS[now.getDay()];
     const monthName = MONTHS[now.getMonth()];
     let width = render.getTextWidth(dayName, config.fontMedium);
     let height = config.fontMedium.height;
-    render.drawText(dayName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2);
-    width = render.getTextWidth(monthName, config.fontMedium);
-    render.drawText(monthName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2 + height);
-    render.end()
+    withEndRender(() => {
+        render.begin(colWidth + 1, config.heightHeader + 1, colWidth, config.heightRow)
+        render.fillRectangle(config.gray, colWidth + 1, config.heightHeader + 1, colWidth, config.heightRow)
+        render.drawText(dayName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2);
+        width = render.getTextWidth(monthName, config.fontMedium);
+        render.drawText(monthName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2 + height);
+    })
 }
 
 export function log(message) {
     if (testing) console.log(message)
+}
+
+export function withEndRender(block) {
+    try {
+        block()
+    } catch (e) {
+    } finally {
+        render.end()
+    }
 }
 
 drawInitial()
