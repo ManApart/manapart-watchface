@@ -1,8 +1,8 @@
 import Battery from "embedded:sensor/Battery";
-import {config, lastDate, log, render, withEndRender} from "./main";
+import {config, drawAll, lastDate, log, render, wasSleeping, withEndRender} from "./main";
 
 let batteryPercent = 100;
-let isConnected = true;
+export let isConnected = true;
 
 const battery = new Battery({
     onSample() {
@@ -30,6 +30,10 @@ export function checkConnection() {
     }
     log(`Bluetooth old: ${isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
     drawHeaderBluetooth()
+    if (isConnected && wasSleeping) {
+        wasSleeping = false
+        drawAll({date: lastDate})
+    }
 }
 
 export function drawHeaderBluetooth() {

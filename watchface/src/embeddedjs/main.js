@@ -1,5 +1,12 @@
 import Poco from "commodetto/Poco";
-import {checkConnection, drawHeaderBattery, drawHeaderBluetooth, drawHeaderDate, getHeaderBarColor} from "./header-bar"
+import {
+    checkConnection,
+    drawHeaderBattery,
+    drawHeaderBluetooth,
+    drawHeaderDate,
+    getHeaderBarColor,
+    isConnected
+} from "./header-bar"
 import {
     drawCurrentWeather,
     drawHourlyForecast,
@@ -9,6 +16,7 @@ import {
 } from "./weather";
 
 const testing = false
+const sleepModeEnabled = true
 export const render = new Poco(screen);
 export const config = {
     black: render.makeColor(0, 0, 0),
@@ -31,6 +39,13 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 
 export let lastDate = new Date();
+export let wasSleeping = false
+
+export function drawAll(event) {
+    drawDaily(event)
+    drawHourly(event)
+    drawMinutely(event)
+}
 
 function drawInitial() {
     withEndRender(() => {
@@ -47,6 +62,10 @@ function drawInitial() {
 function drawDaily(event) {
     const now = event?.date ?? lastDate;
     lastDate = now;
+    if (isSleeping(now)){
+        wasSleeping = true
+        return
+    }
     drawDateNames(now)
     drawHeaderDate(now)
     drawTomorrowWeather()
@@ -55,6 +74,10 @@ function drawDaily(event) {
 function drawHourly(event) {
     const now = event?.date ?? lastDate;
     lastDate = now;
+    if (isSleeping(now)){
+        wasSleeping = true
+        return
+    }
     const weatherIndex = getWeatherHourIndex(now)
     if (weatherIndex >= 5 || weatherIndex < 0) {
         requestWeather()
@@ -71,6 +94,10 @@ function drawHourly(event) {
 function drawMinutely(event) {
     const now = event?.date ?? lastDate;
     lastDate = now;
+    if (isSleeping(now)){
+        wasSleeping = true
+        return
+    }
     drawTime(now)
 }
 
@@ -106,6 +133,12 @@ function drawDateNames(now) {
         width = render.getTextWidth(monthName, config.fontMedium);
         render.drawText(monthName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2 + height);
     })
+}
+
+//Eventually have enabled and given hours be configurable
+function isSleeping(now) {
+    const hour = now.getHours()
+    return sleepModeEnabled && hour >= 22 || hour < 6 && !isConnected
 }
 
 export function log(message) {
