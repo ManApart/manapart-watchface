@@ -13,7 +13,7 @@ const weatherRequest = new Map([
 
 const message = new Message({
     input: 256,
-    output: 256,
+    output: 16,
     keys: ["ready", "weather", "weather_request"],
 
     onWritable() {
@@ -53,7 +53,7 @@ function sendWeatherRequestIfPending() {
 }
 
 export function getWeatherHourIndex(now) {
-    if (weather?.asOf) {
+    if (weather?.asOf !== undefined) {
         const ageHours = (now.getTime() - new Date(weather.asOf).getTime()) / (60 * 60 * 1000);
         return Math.floor(ageHours);
     } else {
@@ -173,7 +173,7 @@ function getWeatherColor(temp, config) {
 async function updateWeather(data) {
     weather = JSON.parse(data)
     if (weather) {
-        saveWeather();
+        saveWeather(data);
         const now = lastDate
         const weatherIndex = getWeatherHourIndex(now)
         drawCurrentWeather(weatherIndex)
@@ -197,11 +197,9 @@ function loadCachedWeather() {
     return false;
 }
 
-function saveWeather() {
-    if (weather) {
-        localStorage.setItem("weather", JSON.stringify(weather));
-        log('Saved Weather')
-    }
+function saveWeather(data) {
+    localStorage.setItem("weather", data);
+    log('Saved Weather')
 }
 
 const weatherIcons = {

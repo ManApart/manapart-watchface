@@ -8,7 +8,7 @@ import {
     requestWeather,
 } from "./weather";
 
-const testing = true
+const testing = false
 export const render = new Poco(screen);
 export const config = {
     black: render.makeColor(0, 0, 0),
@@ -128,9 +128,9 @@ export function log(message) {
     if (testing) console.log(message)
 }
 
+drawInitial()
+checkConnection()
+
 watch.addEventListener("minutechange", drawMinutely);
 watch.addEventListener("hourchange", drawHourly);
 watch.addEventListener("daychange", drawDaily);
-
-checkConnection()
-drawInitial()
