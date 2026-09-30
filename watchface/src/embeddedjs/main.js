@@ -54,15 +54,20 @@ function drawInitial() {
         render.fillRectangle(getHeaderBarColor(), 0, 0, render.width, config.heightHeader);
         const boxHeight = render.height - config.heightHeader - (2 * config.heightRow) - 8
         render.drawRoundRect(2, config.heightRow + config.heightHeader + 4, render.width - 4, boxHeight, config.white, 5);
-        drawHeaderBattery()
-        drawHeaderBluetooth()
+
+        const timeY = (render.height + config.heightHeader - config.fontLarge.height) / 2;
+        let width = render.getTextWidth(":", config.fontLarge);
+        render.drawText(":", config.fontLarge, config.black, (render.width - width) / 2, timeY);
     })
+
+    drawHeaderBattery()
+    drawHeaderBluetooth()
 }
 
 function drawDaily(event) {
     const now = event?.date ?? lastDate;
     lastDate = now;
-    if (isSleeping(now)){
+    if (isSleeping(now)) {
         wasSleeping = true
         return
     }
@@ -74,10 +79,11 @@ function drawDaily(event) {
 function drawHourly(event) {
     const now = event?.date ?? lastDate;
     lastDate = now;
-    if (isSleeping(now)){
+    if (isSleeping(now)) {
         wasSleeping = true
         return
     }
+    drawHours(now)
     const weatherIndex = getWeatherHourIndex(now)
     if (weatherIndex >= 5 || weatherIndex < 0) {
         requestWeather()
@@ -94,14 +100,38 @@ function drawHourly(event) {
 function drawMinutely(event) {
     const now = event?.date ?? lastDate;
     lastDate = now;
-    if (isSleeping(now)){
+    if (isSleeping(now)) {
         wasSleeping = true
         return
     }
-    drawTime(now)
+    drawMinutes(now)
 }
 
-function drawTime(now) {
+function drawHours(now) {
+    const {timeY, hoursStr, timeStr} = getTimeStrings(now)
+    let fullWidth = render.getTextWidth(timeStr, config.fontLarge);
+    let width = render.getTextWidth(hoursStr, config.fontLarge)
+    let startX = (render.width - fullWidth) / 2
+    withEndRender(() => {
+        render.begin(startX, timeY, width, config.fontLarge.height)
+        render.fillRectangle(config.white, startX, timeY, width, config.fontLarge.height)
+        render.drawText(timeStr, config.fontLarge, config.black, startX, timeY);
+    })
+}
+
+function drawMinutes(now) {
+    const {timeY, hoursStr, minutes, timeStr} = getTimeStrings(now)
+    let fullWidth = render.getTextWidth(timeStr, config.fontLarge);
+    let width = render.getTextWidth(minutes, config.fontLarge)
+    let startX = ((render.width - fullWidth) / 2) + render.getTextWidth(`${hoursStr}:`, config.fontLarge)
+    withEndRender(() => {
+        render.begin(startX, timeY, width, config.fontLarge.height)
+        render.fillRectangle(config.white, startX, timeY, width, config.fontLarge.height)
+        render.drawText(minutes, config.fontLarge, config.black, startX, timeY);
+    })
+}
+
+function getTimeStrings(now){
     const timeY = (render.height + config.heightHeader - config.fontLarge.height) / 2;
     let hours = now.getHours();
     if (watch.hour12) {
@@ -110,14 +140,7 @@ function drawTime(now) {
     const hoursStr = String(hours).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const timeStr = `${hoursStr}:${minutes}`;
-
-    let width = render.getTextWidth(timeStr, config.fontLarge);
-    withEndRender(() => {
-        render.begin((render.width - width) / 2, timeY, width, config.fontLarge.height)
-        render.fillRectangle(config.white, (render.width - width) / 2, timeY, width, config.fontLarge.height)
-        render.drawText(timeStr, config.fontLarge, config.black,
-            (render.width - width) / 2, timeY);
-    })
+    return {timeY, hoursStr, minutes, timeStr}
 }
 
 function drawDateNames(now) {
