@@ -87,12 +87,23 @@ export function log(message) {
     if (testing) console.log(message)
 }
 
-export function withEndRender(block) {
+export function withEndRender(x, y, width, height, ownRender, block) {
     try {
+        if (ownRender) render.begin(x, y, width, height)
         block()
     } catch (e) {
     } finally {
-        render.end()
+        if (ownRender) render.end()
+    }
+}
+
+export function renderFull(ownRender, block) {
+    try {
+        if (ownRender) render.begin()
+        block()
+    } catch (e) {
+    } finally {
+        if (ownRender) render.end()
     }
 }
 

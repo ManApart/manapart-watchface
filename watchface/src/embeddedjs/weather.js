@@ -1,4 +1,3 @@
-
 import Poco from "commodetto/Poco";
 import {message} from "./main";
 import {render, config, state, log, withEndRender} from "./config";
@@ -38,12 +37,11 @@ export function getWeatherHourIndex(now) {
     }
 }
 
-export function drawCurrentWeather(hourIndex) {
+export function drawCurrentWeather(hourIndex, ownRender) {
     const startY = config.heightHeader + 2
     const startX = 2
     const colWidth = 65
-    withEndRender(() => {
-        render.begin(startX, startY, colWidth, config.heightRow)
+    withEndRender(startX, startY, colWidth, config.heightRow, ownRender, () => {
         if (weather) {
             let temp = weather.current.temp
             let code = weather.current.code
@@ -68,15 +66,14 @@ export function drawCurrentWeather(hourIndex) {
     })
 }
 
-export function drawTomorrowWeather() {
+export function drawTomorrowWeather(ownRender) {
     const startY = config.heightHeader + 2
     const colWidth = 65
     const startX = render.width - colWidth - 2
     const w = weather?.tomorrow
     if (w) {
-        withEndRender(() => {
+        withEndRender(startX, startY, colWidth, config.heightRow, ownRender, () => {
             const color = getWeatherColor(w.high, config)
-            render.begin(startX, startY, colWidth, config.heightRow)
             render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
 
             let width = render.getTextWidth("Tomorrow", config.fontTiny);
@@ -93,10 +90,9 @@ export function drawTomorrowWeather() {
     }
 }
 
-export function drawHourlyForecast(hourIndex, now) {
+export function drawHourlyForecast(hourIndex, now, ownRender) {
     if (weather) {
-        withEndRender(() => {
-            render.begin(1, render.height - config.heightRow - 2, render.width, config.heightRow)
+        withEndRender(1, render.height - config.heightRow - 2, render.width, config.heightRow, ownRender, () => {
             const currentHour = now.getHours() + 1
             for (let i = 0; i < 4; i++) {
                 const hour = hourIndex + i + 1
