@@ -95,5 +95,7 @@ Pebble.addEventListener("appmessage", function (event) {
 });
 
 Pebble.addEventListener("ready", function () {
-    Pebble.sendAppMessage({ready: 1});
+    setTimeout(() => {
+        Pebble.sendAppMessage({ready: 1});
+    }, 100)
 });

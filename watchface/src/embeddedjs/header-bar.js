@@ -1,8 +1,8 @@
 import Battery from "embedded:sensor/Battery";
-import {config, drawAll, lastDate, log, render, wasSleeping, withEndRender} from "./main";
+import {drawAll} from "./main";
+import {config, render, state, log, withEndRender} from "./config";
 
 let batteryPercent = 100;
-export let isConnected = true;
 
 const battery = new Battery({
     onSample() {
@@ -14,7 +14,7 @@ const battery = new Battery({
         const batColor = getBarColor(batteryPercent)
         if (getBarColor(oldBat) !== batColor) {
             log(`Battery Percent is ${batteryPercent}`)
-            drawHeaderFull(lastDate, batColor)
+            drawHeaderFull(state.lastDate, batColor)
         } else {
             drawHeaderBattery()
         }
@@ -23,16 +23,16 @@ const battery = new Battery({
 batteryPercent = battery.sample().percent;
 
 export function checkConnection() {
-    const oldConnect = isConnected
-    isConnected = watch.connected.app;
-    if (oldConnect === isConnected) {
+    const oldConnect = state.isConnected
+    state.isConnected = watch.connected.app;
+    if (oldConnect === state.isConnected) {
         return
     }
-    log(`Bluetooth old: ${isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
+    log(`Bluetooth old: ${state.isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
     drawHeaderBluetooth()
-    if (isConnected && wasSleeping) {
-        wasSleeping = false
-        drawAll({date: lastDate})
+    if (state.isConnected && state.wasSleeping) {
+        state.wasSleeping = false
+        drawAll({date: state.lastDate})
     }
 }
 
@@ -41,7 +41,7 @@ export function drawHeaderBluetooth() {
     withEndRender(() => {
         render.begin(0, 0, 20, config.heightHeader)
         render.fillRectangle(barColor, 0, 0, render.width, config.heightHeader);
-        if (isConnected) {
+        if (state.isConnected) {
             render.drawText("B", config.fontSmall, config.black, 5, 0);
         }
     })

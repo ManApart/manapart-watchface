@@ -1,45 +1,44 @@
-import Poco from "commodetto/Poco";
 import {
     checkConnection,
     drawHeaderBattery,
     drawHeaderBluetooth,
     drawHeaderDate,
     getHeaderBarColor,
-    isConnected
 } from "./header-bar"
 import {
     drawCurrentWeather,
     drawHourlyForecast,
     drawTomorrowWeather,
     getWeatherHourIndex,
-    requestWeather,
+    requestWeather, sendWeatherRequestIfPending, updateWeather,
 } from "./weather";
+import {config, render, state, log, withEndRender, isSleeping} from "./config";
+import Message from "pebble/message";
 
-const testing = false
-const sleepModeEnabled = true
-export const render = new Poco(screen);
-export const config = {
-    black: render.makeColor(0, 0, 0),
-    white: render.makeColor(255, 255, 255),
-    lightGray: render.makeColor(170, 170, 170),
-    gray: render.makeColor(85, 85, 85),
-    green: render.makeColor(85, 255, 170),
-    orange: render.makeColor(255, 170, 85),
-    red: render.makeColor(255, 170, 170),
-    blue: render.makeColor(85, 170, 255),
-    fontLarge: new render.Font("Roboto-Bold", 49),
-    fontMedium: new render.Font("Gothic-Regular", 28),
-    fontSmall: new render.Font("Gothic-Regular", 18),
-    fontTiny: new render.Font("Gothic-Regular", 14),
-    heightHeader: 20,
-    heightRow: 60,
-}
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+export const message = new Message({
+    input: 256,
+    output: 16,
+    keys: ["ready", "weather", "weather_request"],
 
-export let lastDate = new Date();
-export let wasSleeping = false
+    onWritable() {
+        state.messageWriteable = true;
+        sendWeatherRequestIfPending();
+    },
+    onSuspend() {
+        state.messageWriteable = false;
+    },
+
+    onReadable() {
+        const values = this.read();
+        if (values.has("weather")) {
+            updateWeather(values.get("weather"));
+        }
+    },
+});
+
 
 export function drawAll(event) {
     drawDaily(event)
@@ -65,10 +64,10 @@ function drawInitial() {
 }
 
 function drawDaily(event) {
-    const now = event?.date ?? lastDate;
-    lastDate = now;
+    const now = event?.date ?? state.lastDate;
+    state.lastDate = now;
     if (isSleeping(now)) {
-        wasSleeping = true
+        state.wasSleeping = true
         return
     }
     drawDateNames(now)
@@ -77,10 +76,10 @@ function drawDaily(event) {
 }
 
 function drawHourly(event) {
-    const now = event?.date ?? lastDate;
-    lastDate = now;
+    const now = event?.date ?? state.lastDate;
+    state.lastDate = now;
     if (isSleeping(now)) {
-        wasSleeping = true
+        state.wasSleeping = true
         return
     }
     drawHours(now)
@@ -98,10 +97,10 @@ function drawHourly(event) {
 }
 
 function drawMinutely(event) {
-    const now = event?.date ?? lastDate;
-    lastDate = now;
+    const now = event?.date ?? state.lastDate;
+    state.lastDate = now;
     if (isSleeping(now)) {
-        wasSleeping = true
+        state.wasSleeping = true
         return
     }
     drawMinutes(now)
@@ -131,7 +130,7 @@ function drawMinutes(now) {
     })
 }
 
-function getTimeStrings(now){
+function getTimeStrings(now) {
     const timeY = (render.height + config.heightHeader - config.fontLarge.height) / 2;
     let hours = now.getHours();
     if (watch.hour12) {
@@ -156,25 +155,6 @@ function drawDateNames(now) {
         width = render.getTextWidth(monthName, config.fontMedium);
         render.drawText(monthName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2 + height);
     })
-}
-
-//Eventually have enabled and given hours be configurable
-function isSleeping(now) {
-    const hour = now.getHours()
-    return sleepModeEnabled && hour >= 22 || hour < 6 && !isConnected
-}
-
-export function log(message) {
-    if (testing) console.log(message)
-}
-
-export function withEndRender(block) {
-    try {
-        block()
-    } catch (e) {
-    } finally {
-        render.end()
-    }
 }
 
 drawInitial()

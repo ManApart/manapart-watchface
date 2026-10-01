@@ -1,36 +1,15 @@
-import Message from "pebble/message";
+
 import Poco from "commodetto/Poco";
-import {config, lastDate, log, render, withEndRender} from "./main";
+import {message} from "./main";
+import {render, config, state, log, withEndRender} from "./config";
 
 const iconWidth = 50 * 0.7
 let weather = null;
-let messageWriteable = false;
 let weatherRequestPending = false;
 
 const weatherRequest = new Map([
     ["weather_request", 1]
 ])
-
-const message = new Message({
-    input: 256,
-    output: 16,
-    keys: ["ready", "weather", "weather_request"],
-
-    onWritable() {
-        messageWriteable = true;
-        sendWeatherRequestIfPending();
-    },
-    onSuspend() {
-        messageWriteable = false;
-    },
-
-    onReadable() {
-        const values = this.read();
-        if (values.has("weather")) {
-            updateWeather(values.get("weather"));
-        }
-    },
-});
 
 
 export function requestWeather() {
@@ -38,16 +17,17 @@ export function requestWeather() {
     sendWeatherRequestIfPending()
 }
 
-function sendWeatherRequestIfPending() {
+export function sendWeatherRequestIfPending() {
     // log(`Pending: ${weatherRequestPending}, writable: ${messageWriteable}, connected: ${watch.connected.pebblekit}, decision: ${weatherRequestPending && messageWriteable && watch.connected.pebblekit}`)
-    if (!weatherRequestPending || !messageWriteable || !watch.connected.pebblekit) {
+    if (!weatherRequestPending || !state.messageWriteable || !watch.connected.pebblekit) {
         return;
     }
     try {
+        log("Sending weather request")
         message.write(weatherRequest);
         weatherRequestPending = false;
     } catch (e) {
-        messageWriteable = false;
+        state.messageWriteable = false;
         log("Unable to request weather: " + String(e));
     }
 }
@@ -172,11 +152,12 @@ function getWeatherColor(temp, config) {
     return color;
 }
 
-async function updateWeather(data) {
+export function updateWeather(data) {
+    log("Got weather")
     weather = JSON.parse(data)
     if (weather) {
         saveWeather(data);
-        const now = lastDate
+        const now = state.lastDate
         const weatherIndex = getWeatherHourIndex(now)
         drawCurrentWeather(weatherIndex)
         drawHourlyForecast(weatherIndex, now)
@@ -193,6 +174,7 @@ function loadCachedWeather() {
             return true;
         } catch (e) {
             console.log("Failed to parse cached weather");
+            return false;
         }
     }
     console.log('no weather cached')
