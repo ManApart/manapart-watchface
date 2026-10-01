@@ -8,11 +8,21 @@ int main(void) {
   // Built with `pebble build --debug`: enable the xsbug JavaScript debugger.
   ModdableCreationRecord cr = {
     .recordSize = sizeof(cr),
-    .flags = kModdableCreationFlagDebug,
+    .stack = 4096,
+    .slot  = 32768,
+    .chunk = 24576,
+//    .flags = kModdableCreationFlagDebug,
+    .flags = kModdableCreationFlagLogInstrumentation,
   };
   moddable_createMachine(&cr);
 #else
-  moddable_createMachine(NULL);
+  ModdableCreationRecord cr = {
+      .recordSize = sizeof(cr),
+      .stack = 6144,
+      .slot  = 24576,
+      .chunk = 16384,
+    };
+    moddable_createMachine(&cr);
 #endif
 
   window_destroy(w);

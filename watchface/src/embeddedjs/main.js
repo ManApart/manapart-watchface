@@ -12,7 +12,7 @@ import {
     getWeatherHourIndex,
     requestWeather, sendWeatherRequestIfPending, updateWeather,
 } from "./weather";
-import {config, render, state, log, withEndRender, isSleeping, updateSettings, renderFull} from "./config";
+import {config, render, state, withEndRender, isSleeping, updateSettings, renderFull} from "./config";
 import Message from "pebble/message";
 
 export const message = new Message({
@@ -30,7 +30,6 @@ export const message = new Message({
 
     onReadable() {
         const values = this.read();
-        console.log("received message")
         for (const [key, value] of values) {
             console.log("key=" + key + ", value=" + value);
         }
