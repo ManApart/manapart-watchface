@@ -1,3 +1,7 @@
+const Clay = require('@rebble/clay');
+const clayConfig = require('./config');
+const clay = new Clay(clayConfig);
+
 function getLocation() {
     navigator.geolocation.getCurrentPosition(
         function (pos) {
@@ -89,7 +93,7 @@ function testWeather() {
 }
 
 Pebble.addEventListener("appmessage", function (event) {
-    if (event.payload.weather_request) {
+    if (event.payload.weatherRequest) {
         getLocation()
     }
 });

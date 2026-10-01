@@ -7,11 +7,6 @@ const iconWidth = 50 * 0.7
 let weather = null;
 let weatherRequestPending = false;
 
-const weatherRequest = new Map([
-    ["weather_request", 1]
-])
-
-
 export function requestWeather() {
     weatherRequestPending = true
     sendWeatherRequestIfPending()
@@ -24,7 +19,9 @@ export function sendWeatherRequestIfPending() {
     }
     try {
         log("Sending weather request")
-        message.write(weatherRequest);
+        message.write(new Map([
+            ["weatherRequest", 1]
+        ]));
         weatherRequestPending = false;
     } catch (e) {
         state.messageWriteable = false;
@@ -186,31 +183,21 @@ function saveWeather(data) {
     log('Saved Weather')
 }
 
-const weatherIcons = {
-    partlyCloudy: getIcon(1),
-    heavyRain: getIcon(2),
-    heavySnow: getIcon(3),
-    lightRain: getIcon(4),
-    lightSnow: getIcon(5),
-    cloudy: getIcon(6),
-    sunny: getIcon(7),
-}
-
 function getWeatherIcon(code) {
-    if (code === 0) return weatherIcons.sunny;
-    if (code <= 3) return weatherIcons.cloudy;
-    if (code <= 48) return weatherIcons.lightRain;
-    if (code <= 55) return weatherIcons.lightRain;
-    if (code <= 57) return weatherIcons.lightSnow;
-    if (code <= 65) return weatherIcons.lightRain;
-    if (code <= 67) return weatherIcons.lightSnow;
-    if (code <= 75) return weatherIcons.lightSnow;
-    if (code <= 77) return weatherIcons.lightSnow;
-    if (code <= 82) return weatherIcons.heavyRain;
-    if (code <= 86) return weatherIcons.heavySnow;
-    if (code === 95) return weatherIcons.heavyRain;
-    if (code <= 99) return weatherIcons.heavyRain;
-    return weatherIcons.partlyCloudy;
+    if (code === 0) return getIcon(7); // sunny
+    if (code <= 3) return getIcon(1); // cloudy
+    if (code <= 48) return getIcon(4); // light rain
+    if (code <= 55) return getIcon(4); //light rain
+    if (code <= 57) return getIcon(5); //light snow
+    if (code <= 65) return getIcon(4); // light rain
+    if (code <= 67) return getIcon(5); // light snow
+    if (code <= 75) return getIcon(5); // light snow
+    if (code <= 77) return getIcon(5); // light snow
+    if (code <= 82) return getIcon(2); // heavy rain
+    if (code <= 86) return getIcon(3); // heavy snow
+    if (code === 95) return getIcon(2); // heavy rain
+    if (code <= 99) return getIcon(2); // heavy rain
+    return getIcon(1);
 }
 
 function getIcon(i) {

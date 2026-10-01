@@ -12,7 +12,7 @@ import {
     getWeatherHourIndex,
     requestWeather, sendWeatherRequestIfPending, updateWeather,
 } from "./weather";
-import {config, render, state, log, withEndRender, isSleeping} from "./config";
+import {config, render, state, log, withEndRender, isSleeping, updateSettings} from "./config";
 import Message from "pebble/message";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -21,7 +21,7 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 export const message = new Message({
     input: 256,
     output: 16,
-    keys: ["ready", "weather", "weather_request"],
+    keys: ["ready", "weather", "weatherRequest", "timeText", "timeBackground"],
 
     onWritable() {
         state.messageWriteable = true;
@@ -33,12 +33,27 @@ export const message = new Message({
 
     onReadable() {
         const values = this.read();
+        console.log("received message")
+        for (const [key, value] of values) {
+            console.log("key=" + key + ", value=" + value);
+        }
+
         if (values.has("weather")) {
             updateWeather(values.get("weather"));
         }
+        if (values.has("timeText") || values.has("timeBackground")) {
+            updateSettings(values)
+            drawFull()
+        }
+
     },
 });
 
+//TODO - don't do individual begins
+function drawFull() {
+    drawInitial()
+    drawAll({now: state.lastDate})
+}
 
 export function drawAll(event) {
     drawDaily(event)
@@ -52,11 +67,11 @@ function drawInitial() {
         render.fillRectangle(config.gray, 0, 0, render.width, render.height);
         render.fillRectangle(getHeaderBarColor(), 0, 0, render.width, config.heightHeader);
         const boxHeight = render.height - config.heightHeader - (2 * config.heightRow) - 8
-        render.drawRoundRect(2, config.heightRow + config.heightHeader + 4, render.width - 4, boxHeight, config.white, 5);
+        render.drawRoundRect(2, config.heightRow + config.heightHeader + 4, render.width - 4, boxHeight, config.timeBackground, 5);
 
         const timeY = (render.height + config.heightHeader - config.fontLarge.height) / 2;
         let width = render.getTextWidth(":", config.fontLarge);
-        render.drawText(":", config.fontLarge, config.black, (render.width - width) / 2, timeY);
+        render.drawText(":", config.fontLarge, config.timeText, (render.width - width) / 2, timeY);
     })
 
     drawHeaderBattery()
@@ -113,8 +128,8 @@ function drawHours(now) {
     let startX = (render.width - fullWidth) / 2
     withEndRender(() => {
         render.begin(startX, timeY, width, config.fontLarge.height)
-        render.fillRectangle(config.white, startX, timeY, width, config.fontLarge.height)
-        render.drawText(timeStr, config.fontLarge, config.black, startX, timeY);
+        render.fillRectangle(config.timeBackground, startX, timeY, width, config.fontLarge.height)
+        render.drawText(timeStr, config.fontLarge, config.timeText, startX, timeY);
     })
 }
 
@@ -125,8 +140,8 @@ function drawMinutes(now) {
     let startX = ((render.width - fullWidth) / 2) + render.getTextWidth(`${hoursStr}:`, config.fontLarge)
     withEndRender(() => {
         render.begin(startX, timeY, width, config.fontLarge.height)
-        render.fillRectangle(config.white, startX, timeY, width, config.fontLarge.height)
-        render.drawText(minutes, config.fontLarge, config.black, startX, timeY);
+        render.fillRectangle(config.timeBackground, startX, timeY, width, config.fontLarge.height)
+        render.drawText(minutes, config.fontLarge, config.timeText, startX, timeY);
     })
 }
 

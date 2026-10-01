@@ -12,9 +12,13 @@ export const state = {
 
 export const render = new Poco(screen);
 
+const settings = loadSettings()
+
 export const config = {
     black: render.makeColor(0, 0, 0),
     white: render.makeColor(255, 255, 255),
+    timeText: render.makeColor(0, 0, 0),
+    timeBackground: render.makeColor(255, 255, 255),
     lightGray: render.makeColor(170, 170, 170),
     gray: render.makeColor(85, 85, 85),
     green: render.makeColor(85, 255, 170),
@@ -27,6 +31,49 @@ export const config = {
     fontTiny: new render.Font("Gothic-Regular", 14),
     heightHeader: 20,
     heightRow: 60,
+}
+
+function loadSettings() {
+    const DEFAULT_SETTINGS = {
+        timeBackground: (255 << 16) | (255 << 8) | 255,
+        timeText: (0 << 16) | (0 << 8) | 0,
+    };
+    const stored = localStorage.getItem("settings");
+    if (stored) {
+        try {
+            return {...DEFAULT_SETTINGS, ...JSON.parse(stored)};
+        } catch (e) {
+            console.log("Failed to parse settings");
+        }
+    }
+    return DEFAULT_SETTINGS;
+}
+
+function updateConfigFromSettings() {
+    config.timeBackground = makeColor(settings.timeBackground)
+    config.timeText = makeColor(settings.timeText)
+}
+
+function makeColor(rgb) {
+    const r = (rgb >> 16) & 0xFF;
+    const g = (rgb >> 8) & 0xFF;
+    const b = rgb & 0xFF;
+    return render.makeColor(r, g, b);
+}
+
+export function updateSettings(values) {
+    if (values.has("timeBackground")) {
+        settings.timeBackground = values.get("timeBackground");
+    }
+    if (values.has("timeText")) {
+        settings.timeText = values.get("timeText");
+    }
+    saveSettings()
+    updateConfigFromSettings()
+}
+
+function saveSettings() {
+    localStorage.setItem("settings", JSON.stringify(settings));
 }
 
 
@@ -48,3 +95,5 @@ export function withEndRender(block) {
         render.end()
     }
 }
+
+updateConfigFromSettings()

@@ -29,7 +29,9 @@
     "messageKeys": [
       "ready",
       "weather",
-      "weather_request"
+      "weatherRequest",
+      "timeText",
+      "timeBackground"
     ],
     "resources": {
       "media": [
