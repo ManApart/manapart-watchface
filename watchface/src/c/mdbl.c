@@ -11,6 +11,7 @@ int main(void) {
     .stack = 4096,
     .slot  = 32768,
     .chunk = 24576,
+    .fxBuildFFI = fxBuildFFI,
 //    .flags = kModdableCreationFlagDebug,
     .flags = kModdableCreationFlagLogInstrumentation,
   };
@@ -21,6 +22,7 @@ int main(void) {
       .stack = 6144,
       .slot  = 24576,
       .chunk = 16384,
+      .fxBuildFFI = fxBuildFFI,
     };
     moddable_createMachine(&cr);
 #endif

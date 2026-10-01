@@ -47,6 +47,21 @@ module.exports = [
         ]
     },
     {
+        "type": "section",
+        "items": [
+            {
+                "type": "heading",
+                "defaultValue": "Preferences"
+            },
+            {
+                "type": "toggle",
+                "messageKey": "sleepModeEnabled",
+                "defaultValue": true,
+                "label": "Pause updates during quiet hours"
+            },
+        ]
+    },
+    {
         "type": "submit",
         "defaultValue": "Save Settings"
     }

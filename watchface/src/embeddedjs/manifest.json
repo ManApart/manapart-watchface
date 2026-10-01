@@ -8,5 +8,16 @@
 		"weather": "./weather",
 		"config": "./config",
 		"main": "./main"
+	},
+	"ffi": {
+		"sources": [
+			"./utils.c"
+		],
+		"functions": {
+			"isQuietTimeActive": {
+				"arguments": [],
+				"returns": "int32_t"
+			}
+		}
 	}
 }

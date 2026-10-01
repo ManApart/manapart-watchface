@@ -19,7 +19,7 @@ import Message from "pebble/message";
 export const message = new Message({
     input: 256,
     output: 16,
-    keys: ["ready", "weather", "weatherRequest", "timeText", "timeBackground", "nameText", "nameBackground", "normalWeather"],
+    keys: ["ready", "weather", "weatherRequest", "timeText", "timeBackground", "nameText", "nameBackground", "normalWeather", "sleepModeEnabled"],
 
     onWritable() {
         state.messageWriteable = true;
@@ -81,7 +81,7 @@ function drawInitial(ownRender) {
 function drawDaily(event) {
     const now = event?.date ?? state.lastDate;
     state.lastDate = now;
-    if (isSleeping(now)) {
+    if (isSleeping()) {
         state.wasSleeping = true
         return
     }
@@ -93,7 +93,7 @@ function drawDaily(event) {
 function drawHourly(event) {
     const now = event?.date ?? state.lastDate;
     state.lastDate = now;
-    if (isSleeping(now)) {
+    if (isSleeping()) {
         state.wasSleeping = true
         return
     }
@@ -116,7 +116,7 @@ function drawHourly(event) {
 function drawMinutely(event) {
     const now = event?.date ?? state.lastDate;
     state.lastDate = now;
-    if (isSleeping(now)) {
+    if (isSleeping()) {
         state.wasSleeping = true
         return
     }
