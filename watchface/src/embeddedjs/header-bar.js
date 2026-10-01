@@ -39,7 +39,7 @@ export function checkConnection() {
 export function drawHeaderBluetooth(ownRender) {
     let barColor = getBarColor(batteryPercent);
     withEndRender(0, 0, 20, config.heightHeader, ownRender, () => {
-        render.fillRectangle(barColor, 0, 0, render.width, config.heightHeader);
+        render.fillRectangle(barColor, 0, 0, 20, config.heightHeader);
         if (state.isConnected) {
             render.drawText("B", config.fontSmall, config.black, 5, 0);
         }

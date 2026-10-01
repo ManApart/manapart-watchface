@@ -6,6 +6,7 @@ import {
     getHeaderBarColor,
 } from "./header-bar"
 import {
+    drawAsOf,
     drawCurrentWeather,
     drawHourlyForecast,
     drawTomorrowWeather,
@@ -54,6 +55,7 @@ export function drawAll() {
     drawHeaderDate(now, false)
     drawTomorrowWeather(false)
     drawHours(now, false)
+    drawAsOf(false)
     drawCurrentWeather(weatherIndex, false)
     drawHourlyForecast(weatherIndex, now, false)
     drawMinutes(now, false)
@@ -100,10 +102,12 @@ function drawHourly(event) {
     if (weatherIndex >= 5 || weatherIndex < 0) {
         requestWeather()
         if (!state.isConnected) {
+            drawAsOf(true)
             drawCurrentWeather(weatherIndex, true)
             drawHourlyForecast(weatherIndex, now, true)
         }
     } else {
+        drawAsOf(true)
         drawCurrentWeather(weatherIndex, true)
         drawHourlyForecast(weatherIndex, now, true)
     }

@@ -37,6 +37,21 @@ export function getWeatherHourIndex(now) {
     }
 }
 
+export function drawAsOf(ownRender) {
+    let asOf = "No Data"
+    if (weather?.asOf !== undefined) {
+        const d = new Date(weather.asOf)
+        asOf = `As of ${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+    }
+    const width = render.getTextWidth(asOf, config.fontTiny)
+    const startX = (render.width - width) / 2
+    const startY = render.height - config.heightRow - 4 - config.fontTiny.height;
+    withEndRender(startX, startY, width, config.heightRow, ownRender, () => {
+        render.fillRectangle(config.timeBackground, startX, startY, width, config.fontTiny.height)
+        render.drawText(asOf, config.fontTiny, config.timeText, startX, startY);
+    })
+}
+
 export function drawCurrentWeather(hourIndex, ownRender) {
     const startY = config.heightHeader + 2
     const startX = 2
