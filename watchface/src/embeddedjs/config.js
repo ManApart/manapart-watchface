@@ -19,6 +19,9 @@ export const config = {
     white: render.makeColor(255, 255, 255),
     timeText: render.makeColor(0, 0, 0),
     timeBackground: render.makeColor(255, 255, 255),
+    nameBackground: render.makeColor(0, 0, 0),
+    nameText: render.makeColor(255, 255, 255),
+    normalWeather: render.makeColor(170, 170, 170),
     lightGray: render.makeColor(170, 170, 170),
     gray: render.makeColor(85, 85, 85),
     green: render.makeColor(85, 255, 170),
@@ -37,6 +40,9 @@ function loadSettings() {
     const DEFAULT_SETTINGS = {
         timeBackground: (255 << 16) | (255 << 8) | 255,
         timeText: (0 << 16) | (0 << 8) | 0,
+        nameBackground: (85 << 16) | (170 << 8) | 255,
+        nameText: (255 << 16) | (255 << 8) | 255,
+        normalWeather: (170 << 16) | (170 << 8) | 170,
     };
     const stored = localStorage.getItem("settings");
     if (stored) {
@@ -52,6 +58,9 @@ function loadSettings() {
 function updateConfigFromSettings() {
     config.timeBackground = makeColor(settings.timeBackground)
     config.timeText = makeColor(settings.timeText)
+    config.nameBackground = makeColor(settings.nameBackground)
+    config.nameText = makeColor(settings.nameText)
+    config.normalWeather = makeColor(settings.normalWeather)
 }
 
 function makeColor(rgb) {
@@ -62,14 +71,20 @@ function makeColor(rgb) {
 }
 
 export function updateSettings(values) {
-    if (values.has("timeBackground")) {
-        settings.timeBackground = values.get("timeBackground");
-    }
-    if (values.has("timeText")) {
-        settings.timeText = values.get("timeText");
-    }
+    settings.timeBackground = ifValue(values, "timeBackground", settings.timeBackground);
+    settings.timeText = ifValue(values, "timeText", settings.timeText);
+    settings.nameBackground = ifValue(values, "nameBackground", settings.nameBackground);
+    settings.nameText = ifValue(values, "nameText", settings.nameText);
+    settings.normalWeather = ifValue(values, "normalWeather", settings.normalWeather);
     saveSettings()
     updateConfigFromSettings()
+}
+
+function ifValue(values, key, defaultVal) {
+    if (values.has(key)) {
+        return values.get(key);
+    }
+    return defaultVal
 }
 
 function saveSettings() {

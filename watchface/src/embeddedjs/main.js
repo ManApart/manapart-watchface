@@ -12,13 +12,13 @@ import {
     getWeatherHourIndex,
     requestWeather, sendWeatherRequestIfPending, updateWeather,
 } from "./weather";
-import {config, render, state, withEndRender, isSleeping, updateSettings, renderFull} from "./config";
+import {config, render, state, withEndRender, isSleeping, updateSettings, renderFull, log} from "./config";
 import Message from "pebble/message";
 
 export const message = new Message({
     input: 256,
     output: 16,
-    keys: ["ready", "weather", "weatherRequest", "timeText", "timeBackground"],
+    keys: ["ready", "weather", "weatherRequest", "timeText", "timeBackground", "nameText", "nameBackground", "normalWeather"],
 
     onWritable() {
         state.messageWriteable = true;
@@ -31,13 +31,13 @@ export const message = new Message({
     onReadable() {
         const values = this.read();
         for (const [key, value] of values) {
-            console.log("key=" + key + ", value=" + value);
+            log("key=" + key + ", value=" + value);
         }
 
         if (values.has("weather")) {
             updateWeather(values.get("weather"));
         }
-        if (values.has("timeText") || values.has("timeBackground")) {
+        if (values.has("timeText") || values.has("timeBackground") || values.has("nameBackground") || values.has("nameText")) {
             updateSettings(values)
             drawAll()
         }
@@ -161,11 +161,11 @@ function drawDateNames(now, ownRender) {
     const monthName = MONTHS[now.getMonth()];
     let width = render.getTextWidth(dayName, config.fontMedium);
     let height = config.fontMedium.height;
-    withEndRender(colWidth + 1, config.heightHeader + 1, colWidth, config.heightRow, ownRender, () => {
-        render.fillRectangle(config.gray, colWidth + 1, config.heightHeader + 1, colWidth, config.heightRow)
-        render.drawText(dayName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2);
+    withEndRender(colWidth + 3, config.heightHeader + 2, colWidth - 1, config.heightRow, ownRender, () => {
+        render.drawRoundRect(colWidth + 3, config.heightHeader + 2, colWidth - 1, config.heightRow, config.nameBackground, 5)
+        render.drawText(dayName, config.fontMedium, config.nameText, (render.width - width) / 2, config.heightHeader + 2);
         width = render.getTextWidth(monthName, config.fontMedium);
-        render.drawText(monthName, config.fontMedium, config.white, (render.width - width) / 2, config.heightHeader + 2 + height);
+        render.drawText(monthName, config.fontMedium, config.nameText, (render.width - width) / 2, config.heightHeader + 2 + height);
     })
 }
 

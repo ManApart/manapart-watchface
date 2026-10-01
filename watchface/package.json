@@ -31,7 +31,10 @@
       "weather",
       "weatherRequest",
       "timeText",
-      "timeBackground"
+      "timeBackground",
+      "nameText",
+      "nameBackground",
+      "normalWeather"
     ],
     "resources": {
       "media": [

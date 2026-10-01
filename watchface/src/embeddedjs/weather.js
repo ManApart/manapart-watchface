@@ -138,7 +138,7 @@ function getWeatherColor(temp, config) {
     } else if (temp >= 80) {
         color = config.orange;
     } else if (temp >= 30) {
-        color = config.lightGray;
+        color = config.normalWeather;
     } else {
         color = config.blue;
     }
