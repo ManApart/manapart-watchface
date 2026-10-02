@@ -1,5 +1,4 @@
 import Battery from "embedded:sensor/Battery";
-import {drawAll} from "./main";
 import {config, render, state, log, withEndRender} from "./config";
 
 let batteryPercent = 100;
@@ -21,20 +20,6 @@ const battery = new Battery({
     }
 });
 batteryPercent = battery.sample().percent;
-
-export function checkConnection() {
-    const oldConnect = state.isConnected
-    state.isConnected = watch.connected.app;
-    if (oldConnect === state.isConnected) {
-        return
-    }
-    log(`Bluetooth old: ${state.isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
-    drawHeaderBluetooth(true)
-    if (state.isConnected && state.wasSleeping) {
-        state.wasSleeping = false
-        drawAll()
-    }
-}
 
 export function drawHeaderBluetooth(ownRender) {
     let barColor = getBarColor(batteryPercent);
@@ -95,6 +80,3 @@ function getBarColor(batteryPercent) {
         return config.green;
     }
 }
-
-
-watch.addEventListener("connected", checkConnection);

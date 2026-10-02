@@ -1,5 +1,4 @@
 import {
-    checkConnection,
     drawHeaderBattery,
     drawHeaderBluetooth,
     drawHeaderDate,
@@ -42,9 +41,27 @@ export const message = new Message({
             updateSettings(values)
             drawAll()
         }
-
     },
 });
+
+export function checkConnection() {
+    const oldConnect = state.isConnected
+    state.isConnected = watch.connected.app;
+    if (oldConnect === state.isConnected) {
+        return
+    }
+    log(`Bluetooth old: ${state.isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
+    drawHeaderBluetooth(true)
+    if (state.isConnected && state.wasSleeping) {
+        state.wasSleeping = false
+        state.lastDate = new Date()
+        drawAll()
+        const weatherIndex = getWeatherHourIndex(state.lastDate)
+        if (weatherIndex >= 5 || weatherIndex < 0) {
+            requestWeather()
+        }
+    }
+}
 
 export function drawAll() {
     const now = state.lastDate
@@ -179,3 +196,4 @@ checkConnection()
 watch.addEventListener("minutechange", drawMinutely);
 watch.addEventListener("hourchange", drawHourly);
 watch.addEventListener("daychange", drawDaily);
+watch.addEventListener("connected", checkConnection);

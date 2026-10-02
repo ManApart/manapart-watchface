@@ -30,7 +30,11 @@ export function sendWeatherRequestIfPending() {
 
 export function getWeatherHourIndex(now) {
     if (weather?.asOf !== undefined) {
-        const ageHours = (now.getTime() - new Date(weather.asOf).getTime()) / (60 * 60 * 1000);
+        const start = new Date(weather.asOf)
+        if (isNaN(start.getTime())) return -1;
+        start.setMinutes(0,0,0)
+
+        const ageHours = (now.getTime() - start.getTime()) / (60 * 60 * 1000);
         return Math.floor(ageHours);
     } else {
         return -1;
@@ -41,7 +45,16 @@ export function drawAsOf(ownRender) {
     let asOf = "No Data"
     if (weather?.asOf !== undefined) {
         const d = new Date(weather.asOf)
-        asOf = `As of ${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+        let hours = d.getHours()
+        let am = ""
+        if (watch.hour12) {
+            am = " am"
+            if (hours > 12){
+                am = " pm"
+            }
+            hours = hours % 12 || 12;
+        }
+        asOf = `As of ${hours}:${String(d.getMinutes()).padStart(2, "0")}${am}`;
     }
     const width = render.getTextWidth(asOf, config.fontTiny)
     const startX = (render.width - width) / 2
@@ -170,6 +183,7 @@ export function updateWeather(data) {
         drawCurrentWeather(weatherIndex, true)
         drawHourlyForecast(weatherIndex, now, true)
         drawTomorrowWeather(true)
+        drawAsOf(true)
     }
 }
 
