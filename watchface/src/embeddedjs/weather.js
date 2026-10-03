@@ -1,6 +1,6 @@
 import Poco from "commodetto/Poco";
 import {message} from "./main";
-import {render, config, state, log, withEndRender, getUnit} from "./config";
+import {render, config, state, log, withEndRender, getUnit, settings} from "./config";
 
 const iconWidth = 50 * 0.7
 let weather = null;
@@ -161,11 +161,11 @@ function drawForecastSlot(render, config, i, forecastHour, temp, code) {
 
 function getWeatherColor(temp, config) {
     let color;
-    if (temp >= config.hotThresh) {
+    if (temp >= settings.hotThresh) {
         color = config.red;
-    } else if (temp >= config.warmThresh) {
+    } else if (temp >= settings.warmThresh) {
         color = config.orange;
-    } else if (temp >= config.normalThresh) {
+    } else if (temp >= settings.normalThresh) {
         color = config.normalWeather;
     } else {
         color = config.blue;

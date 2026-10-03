@@ -11,7 +11,7 @@ export const state = {
 
 export const render = new Poco(screen);
 
-const settings = loadSettings()
+export const settings = loadSettings()
 
 export const config = {
     black: render.makeColor(0, 0, 0),
@@ -31,9 +31,6 @@ export const config = {
     fontMedium: new render.Font("Gothic-Regular", 28),
     fontSmall: new render.Font("Gothic-Regular", 18),
     fontTiny: new render.Font("Gothic-Regular", 14),
-    hotThresh: 90,
-    warmThresh: 80,
-    normalThresh: 30,
     heightHeader: 20,
     heightRow: 60,
 }
@@ -68,9 +65,6 @@ function updateConfigFromSettings() {
     config.nameBackground = makeColor(settings.nameBackground)
     config.nameText = makeColor(settings.nameText)
     config.normalWeather = makeColor(settings.normalWeather)
-    config.hotThresh = settings.hotThresh
-    config.warmThresh = settings.warmThresh
-    config.normalThresh = settings.normalThresh
 }
 
 function makeColor(rgb) {
