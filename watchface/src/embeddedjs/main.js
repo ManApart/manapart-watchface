@@ -193,6 +193,10 @@ function drawDateNames(now, ownRender) {
     })
 }
 
+function resumeFocus(inFocus) {
+    if (inFocus) drawAll()
+}
+
 drawInitial(true)
 checkConnection()
 
@@ -200,3 +204,4 @@ watch.addEventListener("minutechange", drawMinutely);
 watch.addEventListener("hourchange", drawHourly);
 watch.addEventListener("daychange", drawDaily);
 watch.addEventListener("connected", checkConnection);
+watch.addEventListener("didFocus", resumeFocus);
