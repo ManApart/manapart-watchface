@@ -72,6 +72,7 @@ function fetchWeather(latitude, longitude) {
 
 function testWeather() {
     const weather = {
+        asOf: new Date().getTime(),
         current: {
             temp: 70,
             code: 0,

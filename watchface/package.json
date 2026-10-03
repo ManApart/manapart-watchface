@@ -1,5 +1,5 @@
 {
-  "name": "manapart-face",
+  "name": "weather-glance",
   "author": "Manapart",
   "version": "1.0.0",
   "keywords": [
@@ -10,14 +10,13 @@
     "@rebble/clay": "^1.1.0"
   },
   "pebble": {
-    "displayName": "manapart-face",
+    "displayName": "Weather Glance",
     "uuid": "cc8c22c1-fb2d-467c-8fc1-16fe140712e7",
     "projectType": "moddable",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
-      "emery",
-      "gabbro"
+      "emery"
     ],
     "capabilities": [
       "location",
