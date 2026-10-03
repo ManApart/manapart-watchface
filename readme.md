@@ -1,3 +1,19 @@
+# Weather Glance
+
+Designed to be glancable for time, or inspected for more information. Includes both date/day names and a full date for those forgetful of the day/month.
+
+Features light customization with defaults heavily biasing towards my personal preferences. You can change the color of the time display and the the date names, as well as the threshold for when a weather changes color from cold -> norma -> warm -> hot.
+
+In order to save battery, you can use a 'sleep mode' feature that pauses everything (even refreshing the screen) during quiet hours if disconnected. On end of quiet hours, it will start updating again, and on first reconnect it will refetch weather if stale.
+
+
+Inspired by Loopy Time and Comic Weather.
+
+![](pics/settings.png)
+
+
+## Notes to Self
+
 npx live-server concept/
 
 
