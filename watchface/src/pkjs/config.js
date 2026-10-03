@@ -47,6 +47,51 @@ module.exports = [
         "items": [
             {
                 "type": "heading",
+                "defaultValue": "Thresholds"
+            },
+            {
+                "type": "input",
+                "messageKey": "hotThresh",
+                "defaultValue": "90",
+                "serializeValueAs": "integer",
+                "label": "Hot Threshold",
+                "description": "Weather hotter than this will be red.",
+                "attributes": {
+                    "type": "number",
+                    "step": 1
+                }
+            },
+            {
+                "type": "input",
+                "messageKey": "warmThresh",
+                "defaultValue": "80",
+                "serializeValueAs": "integer",
+                "label": "Warm Threshold",
+                "description": "Weather hotter than this will be orange.",
+                "attributes": {
+                    "type": "number",
+                    "step": 1
+                }
+            },
+            {
+                "type": "input",
+                "messageKey": "normalThresh",
+                "defaultValue": "30",
+                "serializeValueAs": "integer",
+                "label": "Normal Threshold",
+                "description": "Weather colder than this will be blue.",
+                "attributes": {
+                    "type": "number",
+                    "step": 1
+                }
+            }
+        ]
+    },
+    {
+        "type": "section",
+        "items": [
+            {
+                "type": "heading",
                 "defaultValue": "Preferences"
             },
             {
@@ -60,7 +105,7 @@ module.exports = [
                 "messageKey": "useFahrenheit",
                 "defaultValue": true,
                 "label": "Use Fahrenheit"
-            },
+            }
         ]
     },
     {

@@ -161,11 +161,11 @@ function drawForecastSlot(render, config, i, forecastHour, temp, code) {
 
 function getWeatherColor(temp, config) {
     let color;
-    if (temp >= 90) {
+    if (temp >= config.hotThresh) {
         color = config.red;
-    } else if (temp >= 80) {
+    } else if (temp >= config.warmThresh) {
         color = config.orange;
-    } else if (temp >= 30) {
+    } else if (temp >= config.normalThresh) {
         color = config.normalWeather;
     } else {
         color = config.blue;

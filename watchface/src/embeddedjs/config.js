@@ -31,6 +31,9 @@ export const config = {
     fontMedium: new render.Font("Gothic-Regular", 28),
     fontSmall: new render.Font("Gothic-Regular", 18),
     fontTiny: new render.Font("Gothic-Regular", 14),
+    hotThresh: 90,
+    warmThresh: 80,
+    normalThresh: 30,
     heightHeader: 20,
     heightRow: 60,
 }
@@ -39,6 +42,9 @@ function loadSettings() {
     const DEFAULT_SETTINGS = {
         sleepModeEnabled: true,
         useFahrenheit: true,
+        hotThresh: 90,
+        warmThresh: 80,
+        normalThresh: 30,
         timeBackground: (255 << 16) | (255 << 8) | 255,
         timeText: (0 << 16) | (0 << 8) | 0,
         nameBackground: (85 << 16) | (170 << 8) | 255,
@@ -62,6 +68,9 @@ function updateConfigFromSettings() {
     config.nameBackground = makeColor(settings.nameBackground)
     config.nameText = makeColor(settings.nameText)
     config.normalWeather = makeColor(settings.normalWeather)
+    config.hotThresh = settings.hotThresh
+    config.warmThresh = settings.warmThresh
+    config.normalThresh = settings.normalThresh
 }
 
 function makeColor(rgb) {
@@ -79,6 +88,9 @@ export function updateSettings(values) {
     settings.normalWeather = ifValue(values, "normalWeather", settings.normalWeather);
     settings.sleepModeEnabled = ifValue(values, "sleepModeEnabled", settings.sleepModeEnabled);
     settings.useFahrenheit = ifValue(values, "useFahrenheit", settings.useFahrenheit);
+    settings.hotThresh = ifValue(values, "hotThresh", settings.hotThresh);
+    settings.warmThresh = ifValue(values, "warmThresh", settings.warmThresh);
+    settings.normalThresh = ifValue(values, "normalThresh", settings.normalThresh);
     saveSettings()
     updateConfigFromSettings()
 }
@@ -93,7 +105,6 @@ function ifValue(values, key, defaultVal) {
 function saveSettings() {
     localStorage.setItem("settings", JSON.stringify(settings));
 }
-
 
 export function isSleeping() {
     return settings.sleepModeEnabled && !state.isConnected && Boolean(Natives.isQuietTimeActive())

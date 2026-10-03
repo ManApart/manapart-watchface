@@ -15,10 +15,12 @@ import {
 import {config, render, state, withEndRender, isSleeping, updateSettings, renderFull, log} from "./config";
 import Message from "pebble/message";
 
+const settings = ["timeText", "timeBackground", "nameText", "nameBackground", "normalWeather", "sleepModeEnabled", "useFahrenheit", "hotThresh", "warmThresh", "normalThresh"]
+
 export const message = new Message({
     input: 256,
     output: 16,
-    keys: ["ready", "weather", "weatherRequest", "timeText", "timeBackground", "nameText", "nameBackground", "normalWeather", "sleepModeEnabled", "useFahrenheit"],
+    keys: ["ready", "weather", "weatherRequest"].concat(settings),
 
     onWritable() {
         state.messageWriteable = true;
@@ -37,7 +39,7 @@ export const message = new Message({
         if (values.has("weather")) {
             updateWeather(values.get("weather"));
         }
-        if (values.has("timeText") || values.has("timeBackground") || values.has("nameBackground") || values.has("nameText") || values.has("useFahrenheit")) {
+        if (settings.some(x => values.has(x))) {
             updateSettings(values)
             if (values.has("useFahrenheit")) requestWeather()
             drawAll()
