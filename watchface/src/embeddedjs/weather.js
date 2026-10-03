@@ -1,6 +1,6 @@
 import Poco from "commodetto/Poco";
 import {message} from "./main";
-import {render, config, state, log, withEndRender} from "./config";
+import {render, config, state, log, withEndRender, getUnit} from "./config";
 
 const iconWidth = 50 * 0.7
 let weather = null;
@@ -73,7 +73,7 @@ export function drawCurrentWeather(hourIndex, ownRender) {
         if (weather) {
             let temp = weather.current.temp
             let code = weather.current.code
-            if (hourIndex !== 0) {
+            if (hourIndex > 0) {
                 temp = weather.hourlyTemps[hourIndex] ?? weather.hourlyTemps.slice(-1)[0]
                 code = weather.hourlyCodes[hourIndex] ?? weather.hourlyCodes.slice(-1)[0]
             }
@@ -82,7 +82,7 @@ export function drawCurrentWeather(hourIndex, ownRender) {
             let y = startY + config.fontTiny.height
             render.drawDCI(getWeatherIcon(code), (colWidth - iconWidth) / 2, y);
             y += 28
-            const weatherStr = `${temp}°F`;
+            const weatherStr = `${temp}°${getUnit()}`;
             let width = render.getTextWidth(weatherStr, config.fontSmall);
             render.drawText(weatherStr, config.fontSmall, config.black, (colWidth - width) / 2, y);
         } else {

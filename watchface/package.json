@@ -34,7 +34,8 @@
       "nameText",
       "nameBackground",
       "normalWeather",
-      "sleepModeEnabled"
+      "sleepModeEnabled",
+      "useFahrenheit"
     ],
     "resources": {
       "media": [

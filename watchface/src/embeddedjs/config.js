@@ -38,6 +38,7 @@ export const config = {
 function loadSettings() {
     const DEFAULT_SETTINGS = {
         sleepModeEnabled: true,
+        useFahrenheit: true,
         timeBackground: (255 << 16) | (255 << 8) | 255,
         timeText: (0 << 16) | (0 << 8) | 0,
         nameBackground: (85 << 16) | (170 << 8) | 255,
@@ -77,6 +78,7 @@ export function updateSettings(values) {
     settings.nameText = ifValue(values, "nameText", settings.nameText);
     settings.normalWeather = ifValue(values, "normalWeather", settings.normalWeather);
     settings.sleepModeEnabled = ifValue(values, "sleepModeEnabled", settings.sleepModeEnabled);
+    settings.useFahrenheit = ifValue(values, "useFahrenheit", settings.useFahrenheit);
     saveSettings()
     updateConfigFromSettings()
 }
@@ -95,6 +97,11 @@ function saveSettings() {
 
 export function isSleeping() {
     return settings.sleepModeEnabled && !state.isConnected && Boolean(Natives.isQuietTimeActive())
+}
+
+export function getUnit() {
+    if (settings.useFahrenheit) return "F"
+    return "C"
 }
 
 export function log(message) {

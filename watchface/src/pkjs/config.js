@@ -1,11 +1,7 @@
 module.exports = [
     {
         "type": "heading",
-        "defaultValue": "Watchface Settings"
-    },
-    {
-        "type": "text",
-        "defaultValue": "Customize your watchface appearance and preferences."
+        "defaultValue": "Weather Glance Settings"
     },
     {
         "type": "section",
@@ -57,7 +53,13 @@ module.exports = [
                 "type": "toggle",
                 "messageKey": "sleepModeEnabled",
                 "defaultValue": true,
-                "label": "Pause updates during quiet hours"
+                "label": "Pause all updates during quiet hours if disconnected."
+            },
+            {
+                "type": "toggle",
+                "messageKey": "useFahrenheit",
+                "defaultValue": true,
+                "label": "Use Fahrenheit"
             },
         ]
     },

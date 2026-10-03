@@ -19,14 +19,27 @@ function getLocation() {
             timeout:
                 10000
         }
-    )
-    ;
+    );
+}
+
+function getSettings() {
+    const saved = JSON.parse(localStorage.getItem('clay-settings')) || {};
+
+    return {
+        useFahrenheit: saved.useFahrenheit !== undefined ? saved.useFahrenheit : true,
+    };
 }
 
 function fetchWeather(latitude, longitude) {
-    const request = new XMLHttpRequest();
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&forecast_days=2&temperature_unit=fahrenheit&timezone=auto`
+    const settings = getSettings()
+    let unit = ""
+    if (settings.useFahrenheit) {
+        unit = "&temperature_unit=fahrenheit"
+    }
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code&forecast_days=2${unit}&timezone=auto`
 
+    console.log(`Requesting with ${unit}`)
+    const request = new XMLHttpRequest();
     request.open("GET", url);
     request.onload = function () {
         if (request.status !== 200) {
