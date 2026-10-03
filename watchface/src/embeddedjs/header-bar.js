@@ -34,7 +34,7 @@ export function drawHeaderBluetooth(ownRender) {
 export function drawHeaderDate(now, ownRender) {
     let barColor = getBarColor(batteryPercent);
     const date = now.getDate()
-    const month = now.getMonth()
+    const month = now.getMonth() + 1
     const year = now.getFullYear().toString().slice(-2)
     const dateStr = `${month}/${date}/${year}`;
     let width = render.getTextWidth(dateStr, config.fontSmall);
