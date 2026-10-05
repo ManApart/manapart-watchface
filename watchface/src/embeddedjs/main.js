@@ -53,7 +53,6 @@ export function checkConnection() {
     if (oldConnect === state.isConnected) {
         return
     }
-    log(`Bluetooth old: ${state.isConnected}, app: ${watch.connected.app}, pebblekit: ${watch.connected.pebblekit}`);
     drawHeaderBluetooth(true)
     if (state.isConnected && state.wasSleeping) {
         state.wasSleeping = false
@@ -117,7 +116,7 @@ function drawHourly(event) {
         state.wasSleeping = true
         return
     }
-    drawHours(now)
+    drawHours(now, true)
     const weatherIndex = getWeatherHourIndex(now)
     if (weatherIndex >= 5 || weatherIndex < 0) {
         requestWeather()

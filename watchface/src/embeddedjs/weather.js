@@ -49,7 +49,7 @@ export function drawAsOf(ownRender) {
         let am = ""
         if (watch.hour12) {
             am = " am"
-            if (hours > 12){
+            if (hours >= 12){
                 am = " pm"
             }
             hours = hours % 12 || 12;
