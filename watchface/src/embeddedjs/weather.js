@@ -140,11 +140,17 @@ function drawForecastSlot(render, config, i, forecastHour, temp, code) {
     const color = getWeatherColor(temp, config)
     render.drawRoundRect(startX, startY, colWidth, config.heightRow, color, 5);
 
-    let pm = "pm"
-    if (forecastHour < 12) {
-        pm = "am"
+    forecastHour = forecastHour % 24
+    let am = ""
+    if (watch.hour12) {
+        am = " am"
+        if (forecastHour >= 12){
+            am = " pm"
+        }
+        forecastHour = forecastHour % 12 || 12;
     }
-    const hourDisplay = `${forecastHour % 12 || 12}${pm}`;
+
+    const hourDisplay = `${forecastHour}${am}`;
     let width = render.getTextWidth(hourDisplay, config.fontTiny);
     render.drawText(hourDisplay, config.fontTiny, config.black, startX + (colWidth - width) / 2, startY);
 

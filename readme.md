@@ -51,5 +51,6 @@ python tools/svg2pdc.py watchface/resources/cloudy.svg
 pebble emu-battery --percent 80
 pebble emu-bt-connection --connected no
 pebble emu-set-timeline-quick-view on
+pebble emu-time-format --emulator emery --format 12h
 BROWSER=firefox pebble emu-app-config
 ```
