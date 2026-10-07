@@ -12,7 +12,6 @@ export function requestWeather() {
 }
 
 export function sendWeatherRequestIfPending() {
-    // log(`Pending: ${weatherRequestPending}, writable: ${messageWriteable}, connected: ${watch.connected.pebblekit}, decision: ${weatherRequestPending && messageWriteable && watch.connected.pebblekit}`)
     if (!weatherRequestPending || !state.messageWriteable || !watch.connected.pebblekit) {
         return;
     }
@@ -174,7 +173,6 @@ function getWeatherColor(temp, config) {
 }
 
 export function updateWeather(data) {
-    log("Got weather")
     weather = JSON.parse(data)
     if (weather) {
         saveWeather(data);
@@ -184,6 +182,7 @@ export function updateWeather(data) {
         drawHourlyForecast(weatherIndex, now, true)
         drawTomorrowWeather(true)
         drawAsOf(true)
+        state.weatherIsStale = false
     }
 }
 

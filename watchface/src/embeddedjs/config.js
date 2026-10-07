@@ -6,7 +6,8 @@ export const state = {
     lastDate: new Date(),
     wasSleeping: false,
     messageWriteable: false,
-    isConnected: true
+    isConnected: true,
+    weatherIsStale: false,
 }
 
 export const render = new Poco(screen);

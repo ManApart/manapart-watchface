@@ -60,6 +60,7 @@ export function checkConnection() {
         drawAll()
         const weatherIndex = getWeatherHourIndex(state.lastDate)
         if (weatherIndex >= 5 || weatherIndex < 0) {
+            state.weatherIsStale = true
             requestWeather()
         }
     }
@@ -119,17 +120,12 @@ function drawHourly(event) {
     drawHours(now, true)
     const weatherIndex = getWeatherHourIndex(now)
     if (weatherIndex >= 5 || weatherIndex < 0) {
+        state.weatherIsStale = true
         requestWeather()
-        if (!state.isConnected) {
-            drawAsOf(true)
-            drawCurrentWeather(weatherIndex, true)
-            drawHourlyForecast(weatherIndex, now, true)
-        }
-    } else {
-        drawAsOf(true)
-        drawCurrentWeather(weatherIndex, true)
-        drawHourlyForecast(weatherIndex, now, true)
     }
+    drawAsOf(true)
+    drawCurrentWeather(weatherIndex, true)
+    drawHourlyForecast(weatherIndex, now, true)
 }
 
 function drawMinutely(event) {
@@ -138,6 +134,8 @@ function drawMinutely(event) {
     if (isSleeping()) {
         state.wasSleeping = true
         return
+    } else if (state.weatherIsStale) {
+        requestWeather()
     }
     drawMinutes(now, true)
 }
