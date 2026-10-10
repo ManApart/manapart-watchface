@@ -1,5 +1,5 @@
 import Poco from "commodetto/Poco";
-import {message} from "./main";
+import {message, refreshMessage} from "./main";
 import {render, config, state, log, withEndRender, getUnit, settings} from "./config";
 
 const iconWidth = 50 * 0.7
@@ -12,8 +12,13 @@ export function requestWeather() {
 }
 
 export function sendWeatherRequestIfPending() {
-    if (!weatherRequestPending || !state.messageWriteable || !watch.connected.app) {
+    if (!weatherRequestPending || !watch.connected.app) {
         return;
+    }
+    if (!state.messageWriteable && state.doRetry) {
+        state.doRetry = false
+        refreshMessage()
+        return
     }
     try {
         log("Sending weather request")
@@ -21,9 +26,14 @@ export function sendWeatherRequestIfPending() {
             ["weatherRequest", 1]
         ]));
         weatherRequestPending = false;
+        state.doRetry = false;
     } catch (e) {
         state.messageWriteable = false;
         log("Unable to request weather: " + String(e));
+        if (state.doRetry) {
+            state.doRetry = false
+            refreshMessage()
+        }
     }
 }
 
@@ -44,7 +54,7 @@ export function drawAsOf(ownRender) {
         let am = ""
         if (watch.hour12) {
             am = " am"
-            if (hours >= 12){
+            if (hours >= 12) {
                 am = " pm"
             }
             hours = hours % 12 || 12;
@@ -140,7 +150,7 @@ function drawForecastSlot(render, config, i, forecastHour, temp, code) {
     let am = ""
     if (watch.hour12) {
         am = " am"
-        if (forecastHour >= 12){
+        if (forecastHour >= 12) {
             am = " pm"
         }
         forecastHour = forecastHour % 12 || 12;
@@ -192,7 +202,7 @@ function setWeatherAsOf() {
     if (weather?.asOf !== undefined) {
         const start = new Date(weather.asOf)
         if (isNaN(start.getTime())) return;
-        start.setMinutes(0,0,0)
+        start.setMinutes(0, 0, 0)
         weather.asOfClean = start.getTime()
     }
 }
@@ -202,6 +212,7 @@ function loadCachedWeather() {
     if (cached) {
         try {
             weather = JSON.parse(cached);
+            setWeatherAsOf()
             console.log("Using cached weather");
             return true;
         } catch (e) {

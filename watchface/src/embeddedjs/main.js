@@ -17,7 +17,7 @@ import Message from "pebble/message";
 
 const settings = ["timeText", "timeBackground", "nameText", "nameBackground", "normalWeather", "sleepModeEnabled", "useFahrenheit", "hotThresh", "warmThresh", "normalThresh"]
 
-const message = new Message({
+const messageOptions = {
     input: 256,
     output: 16,
     keys: ["ready", "weather", "weatherRequest"].concat(settings),
@@ -45,7 +45,8 @@ const message = new Message({
             drawAll()
         }
     },
-});
+}
+export let message = new Message(messageOptions);
 
 export function checkConnection() {
     const oldConnect = state.isConnected
@@ -62,6 +63,15 @@ export function checkConnection() {
         if (weatherIndex >= 5 || weatherIndex < 0) {
             requestWeather()
         }
+    }
+}
+
+export function refreshMessage() {
+    try {
+        state.messageWriteable = false
+        message.close()
+        message = new Message(messageOptions)
+    } catch (e) {
     }
 }
 
@@ -121,6 +131,7 @@ function drawHourly(event) {
     drawHours(now, true)
     const weatherIndex = getWeatherHourIndex(now)
     if (weatherIndex >= 5 || weatherIndex < 0) {
+        state.doRetry = true
         requestWeather()
     }
     drawAsOf(true)
