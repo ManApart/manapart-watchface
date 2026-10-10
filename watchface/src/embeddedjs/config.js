@@ -7,7 +7,6 @@ export const state = {
     wasSleeping: false,
     messageWriteable: false,
     isConnected: true,
-    weatherIsStale: false,
 }
 
 export const render = new Poco(screen);

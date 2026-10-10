@@ -28,12 +28,8 @@ export function sendWeatherRequestIfPending() {
 }
 
 export function getWeatherHourIndex(now) {
-    if (weather?.asOf !== undefined) {
-        const start = new Date(weather.asOf)
-        if (isNaN(start.getTime())) return -1;
-        start.setMinutes(0,0,0)
-
-        const ageHours = (now.getTime() - start.getTime()) / (60 * 60 * 1000);
+    if (weather?.asOfClean !== undefined) {
+        const ageHours = (now.getTime() - weather?.asOfClean) / (60 * 60 * 1000);
         return Math.floor(ageHours);
     } else {
         return -1;
@@ -183,12 +179,21 @@ export function updateWeather(data) {
     if (weather) {
         saveWeather(data);
         const now = state.lastDate
+        setWeatherAsOf()
         const weatherIndex = getWeatherHourIndex(now)
         drawCurrentWeather(weatherIndex, true)
         drawHourlyForecast(weatherIndex, now, true)
         drawTomorrowWeather(true)
         drawAsOf(true)
-        state.weatherIsStale = false
+    }
+}
+
+function setWeatherAsOf() {
+    if (weather?.asOf !== undefined) {
+        const start = new Date(weather.asOf)
+        if (isNaN(start.getTime())) return;
+        start.setMinutes(0,0,0)
+        weather.asOfClean = start.getTime()
     }
 }
 
