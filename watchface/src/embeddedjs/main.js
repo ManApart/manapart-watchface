@@ -17,7 +17,7 @@ import Message from "pebble/message";
 
 const settings = ["timeText", "timeBackground", "nameText", "nameBackground", "normalWeather", "sleepModeEnabled", "useFahrenheit", "hotThresh", "warmThresh", "normalThresh"]
 
-export const message = new Message({
+const message = new Message({
     input: 256,
     output: 16,
     keys: ["ready", "weather", "weatherRequest"].concat(settings),

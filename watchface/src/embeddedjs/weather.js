@@ -12,7 +12,7 @@ export function requestWeather() {
 }
 
 export function sendWeatherRequestIfPending() {
-    if (!weatherRequestPending || !state.messageWriteable || !watch.connected.pebblekit) {
+    if (!weatherRequestPending || !state.messageWriteable || !watch.connected.app) {
         return;
     }
     try {
