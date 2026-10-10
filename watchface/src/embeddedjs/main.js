@@ -1,7 +1,7 @@
 import {
     drawHeaderBattery,
     drawHeaderBluetooth,
-    drawHeaderDate,
+    drawHeaderDate, drawHeaderSleeping,
     getHeaderBarColor,
 } from "./header-bar"
 import {
@@ -102,6 +102,7 @@ function drawDaily(event) {
     const now = event?.date ?? state.lastDate;
     state.lastDate = now;
     if (isSleeping()) {
+        drawHeaderSleeping(true)
         state.wasSleeping = true
         return
     }
@@ -114,6 +115,7 @@ function drawHourly(event) {
     const now = event?.date ?? state.lastDate;
     state.lastDate = now;
     if (isSleeping()) {
+        drawHeaderSleeping(true)
         state.wasSleeping = true
         return
     }
@@ -132,6 +134,7 @@ function drawMinutely(event) {
     const now = event?.date ?? state.lastDate;
     state.lastDate = now;
     if (isSleeping()) {
+        drawHeaderSleeping(true)
         state.wasSleeping = true
         return
     } else if (state.weatherIsStale) {

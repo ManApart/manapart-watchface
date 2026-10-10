@@ -31,6 +31,17 @@ export function drawHeaderBluetooth(ownRender) {
     })
 }
 
+export function drawHeaderSleeping(ownRender) {
+    //Only render once
+    if (state.wasSleeping) return
+
+    let barColor = getBarColor(batteryPercent);
+    withEndRender(0, 0, 20, config.heightHeader, ownRender, () => {
+        render.fillRectangle(barColor, 0, 0, 20, config.heightHeader);
+        render.drawText("S", config.fontSmall, config.black, 5, 0);
+    })
+}
+
 export function drawHeaderDate(now, ownRender) {
     let barColor = getBarColor(batteryPercent);
     const date = now.getDate()
