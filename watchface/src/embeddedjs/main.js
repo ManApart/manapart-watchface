@@ -10,25 +10,17 @@ import {
     drawHourlyForecast,
     drawTomorrowWeather,
     getWeatherHourIndex,
-    requestWeather, sendWeatherRequestIfPending, updateWeather,
+    updateWeather,
 } from "./weather";
 import {config, render, state, withEndRender, isSleeping, updateSettings, renderFull, log} from "./config";
 import Message from "pebble/message";
 
 const settings = ["timeText", "timeBackground", "nameText", "nameBackground", "normalWeather", "sleepModeEnabled", "useFahrenheit", "hotThresh", "warmThresh", "normalThresh"]
 
-const messageOptions = {
+const message = new Message({
     input: 256,
     output: 16,
     keys: ["ready", "weather", "weatherRequest"].concat(settings),
-
-    onWritable() {
-        state.messageWriteable = true;
-        sendWeatherRequestIfPending();
-    },
-    onSuspend() {
-        state.messageWriteable = false;
-    },
 
     onReadable() {
         const values = this.read();
@@ -41,12 +33,10 @@ const messageOptions = {
         }
         if (settings.some(x => values.has(x))) {
             updateSettings(values)
-            if (values.has("useFahrenheit")) requestWeather()
             drawAll()
         }
     },
-}
-export let message = new Message(messageOptions);
+});
 
 export function checkConnection() {
     const oldConnect = state.isConnected
@@ -59,19 +49,6 @@ export function checkConnection() {
         state.wasSleeping = false
         state.lastDate = new Date()
         drawAll()
-        const weatherIndex = getWeatherHourIndex(state.lastDate)
-        if (weatherIndex >= 5 || weatherIndex < 0) {
-            requestWeather()
-        }
-    }
-}
-
-export function refreshMessage() {
-    try {
-        state.messageWriteable = false
-        message.close()
-        message = new Message(messageOptions)
-    } catch (e) {
     }
 }
 
@@ -130,10 +107,6 @@ function drawHourly(event) {
     }
     drawHours(now, true)
     const weatherIndex = getWeatherHourIndex(now)
-    if (weatherIndex >= 5 || weatherIndex < 0) {
-        state.doRetry = true
-        requestWeather()
-    }
     drawAsOf(true)
     drawCurrentWeather(weatherIndex, true)
     drawHourlyForecast(weatherIndex, now, true)
@@ -146,10 +119,6 @@ function drawMinutely(event) {
         drawHeaderSleeping(true)
         state.wasSleeping = true
         return
-    }
-    const weatherIndex = getWeatherHourIndex(now)
-    if (weatherIndex >= 5 || weatherIndex < 0) {
-        requestWeather()
     }
     drawMinutes(now, true)
 }

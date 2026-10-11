@@ -1,41 +1,8 @@
 import Poco from "commodetto/Poco";
-import {message, refreshMessage} from "./main";
 import {render, config, state, log, withEndRender, getUnit, settings} from "./config";
 
 const iconWidth = 50 * 0.7
 let weather = null;
-let weatherRequestPending = false;
-
-export function requestWeather() {
-    weatherRequestPending = true
-    sendWeatherRequestIfPending()
-}
-
-export function sendWeatherRequestIfPending() {
-    if (!weatherRequestPending || !watch.connected.app) {
-        return;
-    }
-    if (!state.messageWriteable && state.doRetry) {
-        state.doRetry = false
-        refreshMessage()
-        return
-    }
-    try {
-        log("Sending weather request")
-        message.write(new Map([
-            ["weatherRequest", 1]
-        ]));
-        weatherRequestPending = false;
-        state.doRetry = false;
-    } catch (e) {
-        state.messageWriteable = false;
-        log("Unable to request weather: " + String(e));
-        if (state.doRetry) {
-            state.doRetry = false
-            refreshMessage()
-        }
-    }
-}
 
 export function getWeatherHourIndex(now) {
     if (weather?.asOfClean !== undefined) {
@@ -187,7 +154,7 @@ function getWeatherColor(temp, config) {
 export function updateWeather(data) {
     weather = JSON.parse(data)
     if (weather) {
-        saveWeather(data);
+        localStorage.setItem("weather", data);
         const now = state.lastDate
         setWeatherAsOf()
         const weatherIndex = getWeatherHourIndex(now)
@@ -222,11 +189,6 @@ function loadCachedWeather() {
     }
     console.log('no weather cached')
     return false;
-}
-
-function saveWeather(data) {
-    localStorage.setItem("weather", data);
-    log('Saved Weather')
 }
 
 const weatherIcons = {

@@ -5,9 +5,7 @@ export const testing = false
 export const state = {
     lastDate: new Date(),
     wasSleeping: false,
-    messageWriteable: false,
     isConnected: true,
-    doRetry: false,
 }
 
 export const render = new Poco(screen);

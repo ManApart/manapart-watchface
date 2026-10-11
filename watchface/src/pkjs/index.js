@@ -1,8 +1,34 @@
 const Clay = require('@rebble/clay');
 const clayConfig = require('./config');
 const clay = new Clay(clayConfig);
+const checkInterval = 60 * 1000
 
-function getLocation() {
+let settings = getSettings()
+
+function tick() {
+    setTimeout(tick, checkInterval)
+    checkWeather()
+}
+
+function checkWeather() {
+    const weather = loadCachedWeather()
+    if (!weather || weather.asOf === undefined || isNaN(weather.asOf)) {
+        getLocationAndWeather()
+        return
+    }
+    const asOf = new Date(weather.asOf)
+    const hours = (new Date() - asOf) / (60 * 60 * 1000)
+    if (hours >= 5) {
+        getLocationAndWeather()
+    } else {
+        const sent = localStorage.getItem("weatherSent") === "true";
+        if (!sent) {
+            sendWeather(JSON.stringify(weather))
+        }
+    }
+}
+
+function getLocationAndWeather() {
     navigator.geolocation.getCurrentPosition(
         function (pos) {
             // testWeather()
@@ -24,10 +50,22 @@ function getLocation() {
 
 function getSettings() {
     const saved = JSON.parse(localStorage.getItem('clay-settings')) || {};
-
     return {
         useFahrenheit: saved.useFahrenheit !== undefined ? saved.useFahrenheit : true,
     };
+}
+
+function loadCachedWeather() {
+    const cached = localStorage.getItem("weather");
+    if (cached) {
+        try {
+            return JSON.parse(cached);
+        } catch (e) {
+            console.log("Failed to parse cached weather");
+            return;
+        }
+    }
+    console.log('no weather cached')
 }
 
 function fetchWeather(latitude, longitude) {
@@ -65,12 +103,9 @@ function fetchWeather(latitude, longitude) {
                 },
             }
             console.log(JSON.stringify(weather))
-
-            Pebble.sendAppMessage(
-                {weather: JSON.stringify(weather)},
-                () => console.log("Weather message sent"),
-                error => console.log("Weather message failed: " + JSON.stringify(error))
-            );
+            const weatherData = JSON.stringify(weather)
+            localStorage.setItem("weather", weatherData);
+            sendWeather(weatherData)
         } catch (error) {
             console.log("Weather parse error: " + error);
         }
@@ -81,6 +116,18 @@ function fetchWeather(latitude, longitude) {
     };
 
     request.send();
+}
+
+function sendWeather(weatherData) {
+    localStorage.setItem("weatherSent", "false");
+    Pebble.sendAppMessage(
+        {weather: weatherData},
+        () => {
+            console.log("Weather message sent")
+            localStorage.setItem("weatherSent", "true");
+        },
+        error => console.log("Weather message failed: " + JSON.stringify(error))
+    );
 }
 
 function testWeather() {
@@ -107,14 +154,21 @@ function testWeather() {
     );
 }
 
-Pebble.addEventListener("appmessage", function (event) {
-    if (event.payload.weatherRequest) {
-        getLocation()
-    }
-});
-
 Pebble.addEventListener("ready", function () {
     setTimeout(() => {
         Pebble.sendAppMessage({ready: 1});
+        tick()
     }, 100)
+});
+
+Pebble.addEventListener("webviewclosed", function (event) {
+    if (!event || !event.response) {
+        return;
+    }
+    const newSettings = getSettings()
+    if (newSettings.useFahrenheit !== settings.useFahrenheit) {
+        localStorage.removeItem("weather")
+        getLocationAndWeather()
+    }
+    settings = newSettings
 });
