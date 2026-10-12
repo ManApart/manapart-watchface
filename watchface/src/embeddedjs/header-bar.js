@@ -6,8 +6,11 @@ let batteryPercent = 100;
 const battery = new Battery({
     onSample() {
         const oldBat = batteryPercent
-        batteryPercent = this.sample().percent;
-        if (batteryPercent === oldBat) {
+        const oldPlugged = state.isPlugged
+        const sample = this.sample()
+        batteryPercent = sample.percent;
+        state.isPlugged = sample.plugged
+        if (batteryPercent === oldBat && oldPlugged === state.isPlugged) {
             return
         }
         const batColor = getBarColor(batteryPercent)
@@ -15,7 +18,12 @@ const battery = new Battery({
             log(`Battery Percent is ${batteryPercent}`)
             drawHeaderFull(state.lastDate, batColor, true)
         } else {
-            drawHeaderBattery(true)
+            if (state.isPlugged !== oldPlugged) {
+                drawHeaderBluetooth(true)
+            }
+            if (batteryPercent !== oldBat) {
+                drawHeaderBattery(true)
+            }
         }
     }
 });
@@ -25,7 +33,9 @@ export function drawHeaderBluetooth(ownRender) {
     let barColor = getBarColor(batteryPercent);
     withEndRender(0, 0, 20, config.heightHeader, ownRender, () => {
         render.fillRectangle(barColor, 0, 0, 20, config.heightHeader);
-        if (state.isConnected) {
+        if (state.isPlugged) {
+            render.drawText("C", config.fontSmall, config.black, 5, 0);
+        } else if (state.isConnected) {
             render.drawText("B", config.fontSmall, config.black, 5, 0);
         }
     })

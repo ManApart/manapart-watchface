@@ -6,6 +6,7 @@ export const state = {
     lastDate: new Date(),
     wasSleeping: false,
     isConnected: true,
+    isPlugged: false,
 }
 
 export const render = new Poco(screen);
