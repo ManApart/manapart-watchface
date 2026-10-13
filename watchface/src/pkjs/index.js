@@ -12,12 +12,16 @@ function tick() {
 
 function checkWeather() {
     const weather = loadCachedWeather()
-    if (!weather || weather.asOf === undefined || isNaN(weather.asOf)) {
+    if (!weather || weather.asOf === undefined) {
         getLocationAndWeather()
         return
     }
-    const asOf = new Date(weather.asOf)
-    const hours = (new Date() - asOf) / (60 * 60 * 1000)
+    const asOf = new Date(weather.asOf).getTime()
+    if (isNaN(asOf)){
+        getLocationAndWeather()
+        return
+    }
+    const hours = (Date.now() - asOf) / (60 * 60 * 1000)
     if (hours >= 5) {
         getLocationAndWeather()
     } else {
